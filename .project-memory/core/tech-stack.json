@@ -1,18 +1,21 @@
 {
   "frontend": {
     "framework": "Next.js",
-    "version": "14 (next@16.0.3)",
+    "version": "16.0.3 (App Router)",
     "language": "TypeScript",
     "uiLibrary": "shadcn/ui (lucide icons, class-variance-authority)"
   },
   "backend": {
-    "runtime": "none",
+    "runtime": "Node (server components available via Next.js)",
     "framework": "",
     "version": ""
   },
   "database": {
-    "primary": "none",
-    "cache": "none"
+    "primary": "PostgreSQL",
+    "provider": "Supabase (managed Postgres)",
+    "orm": "Prisma v5",
+    "cache": "none",
+    "notes": "DATABASE_URL added to .env (redacted in memory). Prisma Client generated to src/generated/prisma/"
   },
   "tools": {
     "bundler": "Next.js built-in",
@@ -20,6 +23,9 @@
     "css": "Tailwind CSS v4",
     "lint": "ESLint (eslint-config-next)",
     "format": "Prettier",
-    "typeChecker": "TypeScript (tsc)"
+    "typeChecker": "TypeScript (tsc)",
+    "uiSetup": "shadcn/ui",
+    "state": "useState/useReducer/Context (client components)",
+    "testing": "(not yet configured)"
   }
 }

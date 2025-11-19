@@ -2,10 +2,14 @@
   "name": "oc-test-coder",
   "version": "0.1.0",
   "type": "web-app",
-  "description": "Next.js 14 app initialized with TypeScript, Tailwind CSS and shadcn/ui",
+  "description": "Next.js 16 (App Router) project initialized with TypeScript, Tailwind CSS v4 and shadcn/ui. Initialization completed for ISSUE #1 (STORY-01-01).",
   "team": {
     "size": 1,
     "roles": ["frontend"]
   },
-  "repository": ""
+  "repository": "https://github.com/lvminhnhat/ai4chill-vcode",
+  "lastCommit": {
+    "hash": "effffc5",
+    "message": "feat: initialize Next.js 14 project with TypeScript, Tailwind CSS and shadcn/ui"
+  }
 }

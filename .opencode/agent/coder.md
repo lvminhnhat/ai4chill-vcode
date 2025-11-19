@@ -80,3 +80,10 @@ tools:
 - Memoization cho expensive computations
 - Debounce/throttle cho events
 - Code splitting để giảm bundle size
+
+## 11.git 
+- Không bao giờ được code bên trong main hoặc master.
+- commit thì cần có số issue.
+
+
+Lưu ý: trước khi bắt đầu code chức năng gì cần dùng agent Scanner để tìm kiếm những thức liên quan đến chức năng đó mà có thể sử dụng lại tất cả hoặc 1 phần.

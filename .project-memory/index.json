@@ -1,26 +1,34 @@
 {
-  "version": "1.0.0",
-  "lastUpdated": "2025-11-19T00:00:00Z",
+  "version": "1.0.2",
+  "lastUpdated": "2025-11-20T12:00:00Z",
   "structure": {
-    "core": ["project", "tech-stack"],
+    "core": ["project", "tech-stack", "git", "issues", "env", "session"],
     "architecture": ["patterns", "folder-structure", "dependencies"],
     "standards": ["naming", "formatting", "imports", "testing"],
     "modules": ["auth", "api", "ui", "database"],
     "files": {
       "components": ["Button"],
-      "services": ["types"],
+      "services": ["types", "db", "test-db"],
       "utils": ["helpers"],
-      "config": ["tsconfig", "eslint", "prettier", "components"]
+      "config": ["tsconfig", "eslint", "prettier", "components"],
+      "prisma": ["schema", "migrations"],
+      "generated": ["prisma-client"]
     }
   },
   "loadingRules": {
     "always": ["core/project", "core/tech-stack"],
     "onDemand": {
-      "coding": ["standards/naming", "standards/formatting", "standards/imports"],
+      "coding": [
+        "standards/naming",
+        "standards/formatting",
+        "standards/imports"
+      ],
       "testing": ["standards/testing"],
       "newComponent": ["modules/ui", "standards/naming"],
       "apiWork": ["modules/api", "files/services/types"],
-      "authWork": ["modules/auth"]
+      "authWork": ["modules/auth"],
+      "initialization": ["core/git", "core/env", "core/session"],
+      "dbInit": ["modules/database", "files/services/db", "files/prisma/schema"]
     }
   }
 }

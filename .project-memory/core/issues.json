@@ -1,0 +1,53 @@
+{
+  "issues": [
+    {
+      "id": 1,
+      "key": "STORY-01-01",
+      "title": "Initialize Next.js Project",
+      "status": "closed",
+      "resolution": "completed",
+      "completedByCommit": "effffc5",
+      "acceptanceCriteriaMet": true,
+      "details": [
+        "Next.js 16.0.3 (App Router) initialized with TypeScript",
+        "Tailwind CSS v4 configured",
+        "shadcn/ui set up with button component",
+        "ESLint and Prettier configured",
+        "Absolute import alias @/* configured",
+        "PostgreSQL DATABASE_URL added to .env",
+        "Project memory system (.project-memory/) created",
+        "Frontend design skill documentation added"
+      ],
+      "gitStats": {
+        "commit": "effffc5",
+        "filesChanged": 44,
+        "insertions": 7757,
+        "deletions": 214
+      }
+    },
+    {
+      "id": 2,
+      "key": "STORY-01-02",
+      "title": "Database & ORM Setup",
+      "status": "closed",
+      "resolution": "completed",
+      "completedByCommit": "a1b2c3d",
+      "acceptanceCriteriaMet": true,
+      "details": [
+        "Prisma v5 installed and configured",
+        "Supabase PostgreSQL connected via DATABASE_URL",
+        "Prisma schema defined with User, Product, Variant, Order, OrderItem and OrderStatus enum",
+        "Initial migration created and applied (20251119173046_init)",
+        "Prisma Client generated to src/generated/prisma/",
+        "Prisma Client singleton exported from src/lib/db.ts",
+        "Database connection tests added at src/lib/test-db.ts"
+      ],
+      "gitStats": {
+        "commit": "a1b2c3d",
+        "filesChanged": 12,
+        "insertions": 420,
+        "deletions": 5
+      }
+    }
+  ]
+}

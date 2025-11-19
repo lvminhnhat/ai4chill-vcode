@@ -1,0 +1,12 @@
+{
+  "path": "prisma/schema.prisma",
+  "type": "prisma-schema",
+  "lastModified": "2025-11-19T17:30:00Z",
+  "contentSummary": "Datasource set to postgresql (env DATABASE_URL). Generator set to output client into src/generated/prisma. Models: User, Product, Variant, Order, OrderItem and enum OrderStatus. Relations defined between products-variants and orders-orderItems, orders-user.",
+  "models": ["User", "Product", "Variant", "Order", "OrderItem"],
+  "enums": ["OrderStatus"],
+  "notes": [
+    "Practical schema layout used for e-commerce style domain",
+    "Migration 20251119173046_init created from this schema"
+  ]
+}

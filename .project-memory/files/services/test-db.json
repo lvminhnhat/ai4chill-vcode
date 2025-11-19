@@ -1,0 +1,10 @@
+{
+  "path": "src/lib/test-db.ts",
+  "type": "test",
+  "lastModified": "2025-11-19T17:31:10Z",
+  "dependencies": ["./db", "dotenv"],
+  "purpose": "Simple script to test Prisma connection to Supabase Postgres (connect and run a basic query)",
+  "notes": [
+    "Run via node or ts-node in dev environment with DATABASE_URL configured"
+  ]
+}

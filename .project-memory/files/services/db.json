@@ -1,0 +1,15 @@
+{
+  "path": "src/lib/db.ts",
+  "type": "service",
+  "lastModified": "2025-11-19T17:30:46Z",
+  "dependencies": ["@prisma/client", "prisma", "dotenv"],
+  "exports": ["prismaClient (singleton)", "PrismaClient"],
+  "patterns": {
+    "singleton": "Global singleton stored on globalThis to avoid multiple instances in Next.js fast-refresh and serverless environments",
+    "usage": "Import prisma from '@/lib/db' and use prisma.<model> in server code or server components"
+  },
+  "notes": [
+    "Follow Next.js recommended Prisma singleton pattern",
+    "Generated client located at src/generated/prisma/"
+  ]
+}

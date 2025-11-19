@@ -1,0 +1,61 @@
+{
+  "orm": "Prisma v5",
+  "provider": "postgresql (Supabase)",
+  "clientGeneration": "src/generated/prisma/",
+  "patterns": {
+    "clientSingleton": "Prisma Client singleton exported from src/lib/db.ts following Next.js best practices (avoid multiple instances in serverless environments)",
+    "migrations": "prisma/migrations/<timestamp>_init",
+    "seeding": "(not yet implemented)"
+  },
+  "models": {
+    "User": {
+      "fields": ["id", "email", "name", "createdAt", "updatedAt"],
+      "notes": "Users used for authentication and order ownership"
+    },
+    "Product": {
+      "fields": [
+        "id",
+        "title",
+        "description",
+        "price",
+        "createdAt",
+        "updatedAt"
+      ],
+      "relations": ["variants"]
+    },
+    "Variant": {
+      "fields": ["id", "productId", "title", "sku", "price", "inventory"],
+      "relations": ["product"]
+    },
+    "Order": {
+      "fields": ["id", "userId", "status", "total", "createdAt", "updatedAt"],
+      "relations": ["items", "user"],
+      "statusEnum": "OrderStatus"
+    },
+    "OrderItem": {
+      "fields": [
+        "id",
+        "orderId",
+        "productId",
+        "variantId",
+        "quantity",
+        "unitPrice"
+      ],
+      "relations": ["order", "product", "variant"]
+    }
+  },
+  "enums": {
+    "OrderStatus": [
+      "PENDING",
+      "PROCESSING",
+      "SHIPPED",
+      "DELIVERED",
+      "CANCELLED"
+    ]
+  },
+  "notes": [
+    "Database layer established with proper relations",
+    "Singleton pattern for Prisma Client in src/lib/db.ts",
+    "Prisma Client generated and imported from src/generated/prisma"
+  ]
+}
