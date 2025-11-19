@@ -1,0 +1,14 @@
+{
+  "root": ["src", "public", "docs"],
+  "src": ["app (Next App Router)", "components", "lib", "services"],
+  "src/app": ["layout.tsx", "page.tsx", "globals.css", "favicon.ico"],
+  "src/components": ["ui/button.tsx"],
+  "src/lib": ["utils.ts"],
+  "src/services": ["types.ts"],
+  "notes": [
+    "Using Next.js App Router (src/app)",
+    "UI components under src/components/ui (shadcn pattern)",
+    "Utilities in src/lib, services (API types) in src/services",
+    "Absolute imports configured with @/* alias"
+  ]
+}

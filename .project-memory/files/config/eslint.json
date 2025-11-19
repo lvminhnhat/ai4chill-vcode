@@ -1,0 +1,7 @@
+{
+  "path": "eslint.config.mjs",
+  "configSummary": {
+    "extends": ["eslint-config-next/core-web-vitals", "eslint-config-next/typescript", "eslint-config-prettier"],
+    "globalIgnores": [".next/**", "out/**", "build/**", "next-env.d.ts"]
+  }
+}

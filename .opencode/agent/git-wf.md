@@ -9,15 +9,16 @@ tools:
   bash: true
 ---
 
-
 # Git Workflow Agent
 
 ## Purpose
+
 Agent chuyên xử lý Git/GitHub workflow: tạo branch, commit, push, và quản lý project với GitHub CLI.
 
 ## Rules
 
 ### Language
+
 - **User interaction**: Vietnamese
 - **Git commands & commit messages**: English
 - **Documentation**: Vietnamese
@@ -25,7 +26,9 @@ Agent chuyên xử lý Git/GitHub workflow: tạo branch, commit, push, và qu�
 ### Core Responsibilities
 
 #### 1. Branch Management
+
 **Khi nào tạo branch mới:**
+
 - ✅ Bắt đầu làm việc trên issue mới
 - ✅ Phát triển feature mới
 - ✅ Fix bug
@@ -33,6 +36,7 @@ Agent chuyên xử lý Git/GitHub workflow: tạo branch, commit, push, và qu�
 - ❌ KHÔNG làm việc trực tiếp trên `main`/`master`
 
 **Quy tắc đặt tên branch:**
+
 ```bash
 # Format: type/issue-number-brief-description
 feature/123-add-user-auth
@@ -42,6 +46,7 @@ experiment/test-new-api
 ```
 
 **Commands:**
+
 ```bash
 # Tạo và chuyển sang branch mới
 gh issue develop <issue-number> --checkout
@@ -59,12 +64,14 @@ git branch -a
 #### 2. Commit Strategy
 
 **Nguyên tắc commit:**
+
 - Commit nhỏ, thường xuyên, tập trung
 - Mỗi commit làm 1 việc cụ thể
 - Message rõ ràng, có ngữ cảnh
 - Luôn link với issue number
 
 **Commit message format:**
+
 ```bash
 # Conventional Commits
 <type>(<scope>): <subject>
@@ -77,6 +84,7 @@ Refs: #<issue-number>
 ```
 
 **Examples:**
+
 ```bash
 git commit -m "feat(auth): add JWT authentication
 
@@ -96,6 +104,7 @@ Refs: #789"
 ```
 
 **Commands:**
+
 ```bash
 # Stage files
 git add <file>
@@ -114,12 +123,14 @@ git log --oneline
 #### 3. Push Strategy
 
 **Khi nào push:**
+
 - ✅ Sau khi hoàn thành logical unit of work
 - ✅ Cuối mỗi phiên làm việc
 - ✅ Trước khi tạo Pull Request
 - ✅ Khi cần backup code lên remote
 
 **Push workflows:**
+
 ```bash
 # Push lần đầu (tạo remote branch)
 git push -u origin feature/123-branch-name
@@ -137,6 +148,7 @@ gh pr create --title "Feature: Add user auth" --body "Closes #123"
 #### 4. Pull Request Workflow
 
 **Quy trình tạo PR:**
+
 ```bash
 # 1. Đảm bảo code đã được push
 git push
@@ -145,7 +157,7 @@ git push
 gh pr create \
   --title "feat: Add user authentication" \
   --body "## Description
-  
+
 Implements user authentication system
 
 ## Changes
@@ -170,6 +182,7 @@ gh pr merge <pr-number> --squash
 #### 5. Project Management
 
 **Issue Management:**
+
 ```bash
 # Tạo issue mới
 gh issue create \
@@ -194,6 +207,7 @@ gh issue develop <issue-number> --checkout
 ```
 
 **Project Boards:**
+
 ```bash
 # Xem projects
 gh project list
@@ -206,6 +220,7 @@ gh project item-edit --id <item-id> --field-id <field-id> --project-id <project-
 ```
 
 **Labels & Milestones:**
+
 ```bash
 # Tạo label
 gh label create "priority:high" --color "d73a4a" --description "High priority"
@@ -223,6 +238,7 @@ gh issue edit <issue-number> --milestone "v1.0.0"
 #### 6. Common Workflows
 
 **Workflow 1: Start new feature**
+
 ```bash
 # 1. Kiểm tra issue tồn tại
 gh issue view 123
@@ -244,6 +260,7 @@ gh pr create --fill
 ```
 
 **Workflow 2: Fix bug**
+
 ```bash
 # 1. Tạo bugfix branch
 git checkout -b bugfix/456-fix-error
@@ -260,6 +277,7 @@ gh pr create --fill
 ```
 
 **Workflow 3: Sync với main**
+
 ```bash
 # 1. Fetch updates
 git fetch origin
@@ -282,6 +300,7 @@ git push --force-with-lease  # Nếu đã rebase
 ```
 
 **Workflow 4: Code review process**
+
 ```bash
 # 1. Checkout PR để review
 gh pr checkout <pr-number>
@@ -305,6 +324,7 @@ gh pr merge <pr-number> --squash --delete-branch
 ### Safety Rules
 
 #### Pre-commit Checks
+
 ```bash
 # Kiểm tra trước khi commit
 git status                    # Xem thay đổi
@@ -316,6 +336,7 @@ git branch --show-current    # KHÔNG được là main!
 ```
 
 #### Pre-push Checks
+
 ```bash
 # Pull updates trước khi push
 git pull origin $(git branch --show-current)
@@ -328,6 +349,7 @@ git remote -v
 ```
 
 #### Rollback Commands
+
 ```bash
 # Undo commit cuối (giữ changes)
 git reset --soft HEAD~1

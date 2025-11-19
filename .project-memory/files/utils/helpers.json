@@ -1,0 +1,12 @@
+{
+  "path": "src/lib/utils.ts",
+  "type": "utility",
+  "lastModified": "2025-11-19T00:00:00Z",
+  "exports": ["cn", "formatDate", "formatDateTime", "isValidEmail", "isValidPhone", "storage"],
+  "notes": [
+    "cn: clsx + twMerge helper",
+    "Date formatting helpers using vi-VN locale",
+    "Basic validation utilities",
+    "LocalStorage wrapper with safe guards for SSR"
+  ]
+}

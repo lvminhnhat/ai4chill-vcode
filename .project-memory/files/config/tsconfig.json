@@ -1,0 +1,10 @@
+{
+  "path": "tsconfig.json",
+  "keySettings": {
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

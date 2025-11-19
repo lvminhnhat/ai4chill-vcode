@@ -1,0 +1,11 @@
+{
+  "name": "oc-test-coder",
+  "version": "0.1.0",
+  "type": "web-app",
+  "description": "Next.js 14 app initialized with TypeScript, Tailwind CSS and shadcn/ui",
+  "team": {
+    "size": 1,
+    "roles": ["frontend"]
+  },
+  "repository": ""
+}

@@ -1,0 +1,33 @@
+{
+  "path": "src/components/ui/button.tsx",
+  "type": "component",
+  "lastModified": "2025-11-19T00:00:00Z",
+  "dependencies": [
+    "react",
+    "@radix-ui/react-slot",
+    "class-variance-authority",
+    "clsx",
+    "tailwind-merge",
+    "@/lib/utils"
+  ],
+  "props": {
+    "variant": "default|destructive|outline|secondary|ghost|link",
+    "size": "default|sm|lg|icon|icon-sm|icon-lg",
+    "disabled": "boolean",
+    "onClick": "(event) => void",
+    "asChild": "boolean"
+  },
+  "patterns": {
+    "styling": "Tailwind classes + cva",
+    "variants": "class-variance-authority",
+    "icons": "lucide-react (icon sizing rules in cva)"
+  },
+  "relatedFiles": [],
+  "notes": [
+    "Uses Radix Slot to support asChild pattern",
+    "Exports Button and buttonVariants",
+    "Single-file component following shadcn/ui style",
+    "Does not use forwardRef (as implemented)",
+    "Follow Tailwind & accessibility guidelines"
+  ]
+}

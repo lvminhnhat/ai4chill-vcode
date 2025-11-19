@@ -1,0 +1,17 @@
+{
+  "componentStructure": {
+    "fileOrganization": "single-file",
+    "includeTests": "same-dir|__tests__ (not yet present)",
+    "includeStyles": "tailwind"
+  },
+  "patterns": {
+    "composition": "hooks|slots (radix Slot used)",
+    "stateManagement": "useState|useReducer|context",
+    "propTypes": "TypeScript"
+  },
+  "conventions": {
+    "eventHandlers": "handleX|onX",
+    "propPrefix": "on|handle|is|has",
+    "childrenPattern": "slots (radix Slot)"
+  }
+}

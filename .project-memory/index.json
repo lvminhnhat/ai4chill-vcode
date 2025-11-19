@@ -1,0 +1,26 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-19T00:00:00Z",
+  "structure": {
+    "core": ["project", "tech-stack"],
+    "architecture": ["patterns", "folder-structure", "dependencies"],
+    "standards": ["naming", "formatting", "imports", "testing"],
+    "modules": ["auth", "api", "ui", "database"],
+    "files": {
+      "components": ["Button"],
+      "services": ["types"],
+      "utils": ["helpers"],
+      "config": ["tsconfig", "eslint", "prettier", "components"]
+    }
+  },
+  "loadingRules": {
+    "always": ["core/project", "core/tech-stack"],
+    "onDemand": {
+      "coding": ["standards/naming", "standards/formatting", "standards/imports"],
+      "testing": ["standards/testing"],
+      "newComponent": ["modules/ui", "standards/naming"],
+      "apiWork": ["modules/api", "files/services/types"],
+      "authWork": ["modules/auth"]
+    }
+  }
+}

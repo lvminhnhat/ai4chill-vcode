@@ -39,6 +39,7 @@ Refs: #issue-number
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation

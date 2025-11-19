@@ -1,0 +1,25 @@
+{
+  "frontend": {
+    "framework": "Next.js",
+    "version": "14 (next@16.0.3)",
+    "language": "TypeScript",
+    "uiLibrary": "shadcn/ui (lucide icons, class-variance-authority)"
+  },
+  "backend": {
+    "runtime": "none",
+    "framework": "",
+    "version": ""
+  },
+  "database": {
+    "primary": "none",
+    "cache": "none"
+  },
+  "tools": {
+    "bundler": "Next.js built-in",
+    "packageManager": "npm",
+    "css": "Tailwind CSS v4",
+    "lint": "ESLint (eslint-config-next)",
+    "format": "Prettier",
+    "typeChecker": "TypeScript (tsc)"
+  }
+}

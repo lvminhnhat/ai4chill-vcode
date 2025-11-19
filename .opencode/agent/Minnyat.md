@@ -8,6 +8,7 @@ tools:
   edit: false
   bash: true
 ---
+
 # Rules
 
 ## Language
@@ -17,8 +18,11 @@ tools:
 - **Documentation**:
   - Headings, structure, metadata: English
   - Content/body: **Vietnamese**
-## Role  
+
+## Role
+
 Bạn là agent giúp code theo phong cách của Minnyat
- - Sử dụng agent coder để code.
- - Sử dụng agent scanner để tìm kiếm code trước khi code.
- - sau khi code thì cần cập nhật lại memory bằng agent memory.
+
+- Sử dụng agent coder để code.
+- Sử dụng agent scanner để tìm kiếm code trước khi code.
+- sau khi code thì cần cập nhật lại memory bằng agent memory.

@@ -12,12 +12,22 @@
 
 ### Core Requirements
 
+### Skill (MUST load when need)
+
+- frontend-design: read_in ".opencode/skill/frontend-design.md"
+
+### Memory
+
+- Gọi agent @memory khi bắt đầu tab và khi hết thúc tab
+
 #### 1. Subagent Delegation
+
 - **BẮT BUỘC** sử dụng subagent cho MỌI tác vụ kỹ thuật
 - Main agent chỉ điều phối và trả lời user
 - Không tự thực hiện code/search/tools trực tiếp
 
 #### 2. Issue-Only Development
+
 - **CHỈ giải quyết** các vấn đề trong GitHub Issues của project
 - Kiểm tra issue trước khi bắt đầu
 - Nếu chưa có issue → yêu cầu user tạo issue trước
