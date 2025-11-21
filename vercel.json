@@ -1,6 +1,5 @@
 {
   "buildCommand": "npx prisma generate && next build",
-  "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["sin1"],
