@@ -1,0 +1,11 @@
+{
+  "path": ".vercelignore",
+  "type": "config",
+  "lastModified": "2025-11-21T00:00:00Z",
+  "summary": "Vercel ignore file for deployments. tsconfig.json was removed from ignore list to allow TypeScript path alias resolution during builds (commit d5e1620).",
+  "content": "# Dependencies\nnode_modules\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# Testing\ncoverage\n.nyc_output\n\n# Development\n.env.local\n.env.development.local\n.env.test.local\n.env.production.local\n\n# Build outputs\n.next/\nout/\ndist/\nbuild/\n\n# Misc\n.DS_Store\n*.pem\n\n# Debug\n.vscode/\n.idea/\n\n# Git\n.git/\n.gitignore\n\n# Documentation\nREADME.md\nCONTRIBUTING.md\nAGENTS.md\n\n# Config files that shouldn't be deployed\n.eslintrc.js\n.prettierrc.js\njest.config.js\n\n# Project memory\n.project-memory/\n\n# Test files\n**/*.test.ts\n**/*.test.tsx\n**/*.spec.ts\n**/*.spec.tsx\n__tests__/\n",
+  "notes": [
+    "tsconfig.json is required during Vercel build (removed from ignore list).",
+    "Removal performed in commit d5e1620 on main — fixes Turbopack/Next.js path alias resolution."
+  ]
+}
