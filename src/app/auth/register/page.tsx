@@ -150,7 +150,7 @@ export default function RegisterPage() {
       if (result.success) {
         // Redirect to login page with success message
         router.push(
-          '/auth/signin?message=Đăng ký thành công! Vui lòng đăng nhập.'
+          '/auth/login?message=Đăng ký thành công! Vui lòng đăng nhập.'
         )
       }
     } catch (error) {
@@ -413,7 +413,7 @@ export default function RegisterPage() {
           <p className="text-sm text-gray-600">
             Đã có tài khoản?{' '}
             <Link
-              href="/auth/signin"
+              href="/auth/login"
               className="font-medium text-blue-600 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Đăng nhập
