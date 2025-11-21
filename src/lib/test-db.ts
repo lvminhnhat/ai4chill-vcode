@@ -11,6 +11,7 @@ async function testDatabaseConnection() {
       data: {
         email: 'test@example.com',
         name: 'Test User',
+        password: 'hashedPassword123',
       },
     })
     console.log('✅ Created user:', user.id)
