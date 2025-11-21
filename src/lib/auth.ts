@@ -64,7 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: user.id,
             email: user.email,
             name: user.name,
-            role: (user as any).role || 'USER',
+            // Note: role field removed - not in database schema
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -86,48 +86,50 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
+        // Store user data in token
+        token.email = user.email
+        token.name = user.name
       }
       return token
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.sub!
-        session.user.role = token.role as 'USER' | 'ADMIN'
+        session.user.email = token.email as string
+        session.user.name = token.name as string | null
+        // Note: role removed - not in database schema
       }
       return session
     },
   },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
   },
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      name: 'next-auth.session-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
         path: '/',
+        secure: process.env.NODE_ENV === 'production',
       },
     },
     callbackUrl: {
-      name: `next-auth.callback-url`,
+      name: 'next-auth.callback-url',
       options: {
-        httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
         path: '/',
+        secure: process.env.NODE_ENV === 'production',
       },
     },
     csrfToken: {
-      name: `next-auth.csrf-token`,
+      name: 'next-auth.csrf-token',
       options: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
         path: '/',
+        secure: process.env.NODE_ENV === 'production',
       },
     },
   },

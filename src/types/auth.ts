@@ -1,14 +1,28 @@
-import { DefaultSession } from 'next-auth'
+import 'next-auth'
 
 declare module 'next-auth' {
   interface Session {
     user: {
       id: string
-      role: 'USER' | 'ADMIN'
-    } & DefaultSession['user']
+      email: string
+      name: string | null
+      // Note: role field removed - not in database schema
+    }
   }
 
   interface User {
-    role: 'USER' | 'ADMIN'
+    id: string
+    email: string
+    name: string | null
+    // Note: role field removed - not in database schema
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string
+    email: string
+    name: string | null
+    // Note: role field removed - not in database schema
   }
 }
