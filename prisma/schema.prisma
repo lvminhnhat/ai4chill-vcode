@@ -14,13 +14,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String     @id @default(cuid())
+  email      String     @unique
+  password   String?    // nullable for OAuth support
+  name       String?
+  role       UserRole   @default(USER)
+  totalSpent Decimal    @default(0) @db.Decimal(10, 2)
+  currentTier String    @default("bronze")
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   // Relations
   orders Order[]
