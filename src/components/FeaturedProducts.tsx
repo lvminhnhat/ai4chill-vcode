@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from 'react'
 import { ProductCard } from './ProductCard'
 import { cn } from '@/lib/utils'
@@ -113,24 +115,22 @@ const FeaturedProducts = React.forwardRef<
     const getGridClasses = () => {
       const { mobile, tablet, desktop } = columns
 
-      const gridClasses = []
-
-      // Mobile columns
-      gridClasses.push(`grid-cols-${mobile}`)
-
-      // Tablet columns
-      if (tablet > mobile) {
-        gridClasses.push(`md:grid-cols-${tablet}`)
+      // Use predefined Tailwind classes to avoid dynamic class generation
+      if (mobile === 1 && tablet === 2 && desktop === 3) {
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+      }
+      if (mobile === 1 && tablet === 2 && desktop === 4) {
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+      }
+      if (mobile === 1 && tablet === 3 && desktop === 3) {
+        return 'grid-cols-1 md:grid-cols-3'
+      }
+      if (mobile === 2 && tablet === 2 && desktop === 3) {
+        return 'grid-cols-2 md:grid-cols-2 lg:grid-cols-3'
       }
 
-      // Desktop columns
-      if (desktop > tablet) {
-        gridClasses.push(`lg:grid-cols-${desktop}`)
-      } else if (desktop > mobile && desktop <= tablet) {
-        gridClasses.push(`lg:grid-cols-${desktop}`)
-      }
-
-      return gridClasses.join(' ')
+      // Default fallback
+      return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
     }
 
     const handleAddToCart = (productId: string) => {
@@ -153,10 +153,11 @@ const FeaturedProducts = React.forwardRef<
 
           {/* Products Grid */}
           <div className={cn('grid gap-6', getGridClasses())}>
-            {products.map(product => (
+            {products.map((product, index) => (
               <ProductCard
                 key={product.id}
                 {...product}
+                priority={index < 6} // Priority for first 6 products (above fold)
                 onAddToCart={handleAddToCart}
               />
             ))}

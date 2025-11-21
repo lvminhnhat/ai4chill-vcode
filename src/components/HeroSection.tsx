@@ -41,7 +41,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     >
       <div className="absolute inset-0 bg-black/10" />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid lg:grid-cols-2 lg:gap-12 lg:items-center">
           {/* Text Content */}
           <div className="text-center lg:text-left space-y-6 lg:space-y-8">

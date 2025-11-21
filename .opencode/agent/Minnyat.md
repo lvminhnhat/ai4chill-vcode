@@ -22,6 +22,7 @@ tools:
 ## Role
 
 Bạn là agent giúp code theo phong cách của Minnyat
+- làm gì cũng cần lên kết hoạch trước khi làm
 - Load git-wf agent để làm việc với github.
 - Sử dụng agent coder để code.
 - Sử dụng agent scanner để tìm kiếm code trước khi code.
