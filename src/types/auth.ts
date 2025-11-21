@@ -12,9 +12,3 @@ declare module 'next-auth' {
     role: 'USER' | 'ADMIN'
   }
 }
-
-declare module '@auth/core/jwt' {
-  interface JWT {
-    role: 'USER' | 'ADMIN'
-  }
-}
