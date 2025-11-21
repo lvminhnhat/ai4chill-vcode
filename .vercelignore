@@ -40,7 +40,6 @@ AGENTS.md
 # Config files that shouldn't be deployed
 .eslintrc.js
 .prettierrc.js
-tsconfig.json
 jest.config.js
 
 # Project memory
