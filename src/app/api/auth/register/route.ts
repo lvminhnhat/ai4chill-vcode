@@ -17,7 +17,6 @@ interface RegisterResponse {
     id: string
     email: string
     name: string | null
-    role: 'USER' | 'ADMIN'
   }
 }
 
@@ -154,19 +153,17 @@ export async function POST(
     // Hash password
     const hashedPassword = await hashPassword(body.password)
 
-    // Create user
+    // Create user (without role field - not in schema)
     const user = await prisma.user.create({
       data: {
         email: body.email.toLowerCase(),
         password: hashedPassword,
         name: body.name || null,
-        role: 'USER',
       },
       select: {
         id: true,
         email: true,
         name: true,
-        role: true,
       },
     })
 
