@@ -114,15 +114,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: 'next-auth.session-token',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'strict', // Changed from 'lax' for better CSRF protection
         path: '/',
         secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60, // Explicit 30 days
+        domain: process.env.COOKIE_DOMAIN || undefined, // Configurable domain
       },
     },
     callbackUrl: {
       name: 'next-auth.callback-url',
       options: {
-        sameSite: 'lax',
+        sameSite: 'strict', // Changed from 'lax' for better CSRF protection
         path: '/',
         secure: process.env.NODE_ENV === 'production',
       },
@@ -131,7 +133,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       name: 'next-auth.csrf-token',
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'strict', // Changed from 'lax' for better CSRF protection
         path: '/',
         secure: process.env.NODE_ENV === 'production',
       },

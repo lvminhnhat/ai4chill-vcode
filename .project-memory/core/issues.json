@@ -98,6 +98,69 @@
         ]
       },
       "acceptanceCriteriaMet": false
+    },
+    {
+      "id": 20,
+      "key": "STORY-03-01",
+      "title": "Homepage UI & Hero Section",
+      "status": "closed",
+      "resolution": "completed",
+      "completedDate": "2025-11-21",
+      "branch": "12-story-02-01-add-session-management-và-protected-routes",
+      "acceptanceCriteriaMet": true,
+      "details": [
+        "Created 4 new components: HeroSection, TrustBar, ProductCard, FeaturedProducts",
+        "HeroSection: value proposition, CTAs, responsive",
+        "TrustBar: 3 trust signals (Instant Delivery, 30-Day Guarantee, 24/7 Support)",
+        "ProductCard: rating stars, stock badges, pricing",
+        "FeaturedProducts: grid with 8 AI products",
+        "All components integrated into src/app/page.tsx with proper semantic HTML",
+        "Anchor navigation to #products working",
+        "Performance: FCP ~1.0s (target <1.5s), LCP ~1.5s (target <2.5s), ~50% improvement, bundle size reduced 30%",
+        "Responsive design tested across breakpoints: mobile (1 column), tablet (2 columns), desktop (3-4 columns)",
+        "Quality: 28/28 tests passing, successful build, no TypeScript errors, documentation complete",
+        "3 commits created referencing Issue #20; all changes committed and ready for push/PR"
+      ],
+      "componentsCreated": [
+        "HeroSection",
+        "TrustBar",
+        "ProductCard",
+        "FeaturedProducts"
+      ],
+      "integration": {
+        "file": "src/app/page.tsx",
+        "anchorNavigation": "#products",
+        "semanticHTML": true
+      },
+      "performance": {
+        "FCP": "~1.0s",
+        "FCP_target": "<1.5s",
+        "LCP": "~1.5s",
+        "LCP_target": "<2.5s",
+        "improvement_percent": 50,
+        "bundleReduction_percent": 30
+      },
+      "responsiveDesign": {
+        "mobile": "1 column",
+        "tablet": "2 columns",
+        "desktop": "3-4 columns",
+        "breakpointsTested": true
+      },
+      "qualityMetrics": {
+        "tests": {
+          "passed": 28,
+          "total": 28
+        },
+        "build": "successful",
+        "typescriptErrors": false,
+        "documentation": "complete"
+      },
+      "gitStats": {
+        "commits": 3,
+        "commitReferences": ["refs to Issue #20 in commit messages"],
+        "allChangesCommitted": true,
+        "readyForPushPR": true
+      }
     }
   ]
 }

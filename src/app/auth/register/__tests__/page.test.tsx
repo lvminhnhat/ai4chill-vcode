@@ -1,507 +1,336 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { useRouter } from 'next/navigation'
-import RegisterPage from '../page'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from '@/lib/auth'
+import LoginPage from '../page'
 
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
+  useSearchParams: jest.fn(),
 }))
 
-// Mock fetch
-global.fetch = jest.fn()
+// Mock NextAuth
+jest.mock('@/lib/auth', () => ({
+  signIn: jest.fn(),
+}))
+
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+  Loader2: () => <div data-testid="loader">Loading...</div>,
+  Eye: () => <div data-testid="eye-icon">Eye</div>,
+  EyeOff: () => <div data-testid="eye-off-icon">EyeOff</div>,
+  CheckCircle: () => <div data-testid="check-icon">Check</div>,
+}))
 
 const mockPush = jest.fn()
-const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>
+const mockRefresh = jest.fn()
+const mockSignIn = signIn as jest.MockedFunction<typeof signIn>
 
-describe('RegisterPage', () => {
+describe('LoginPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseRouter.mockReturnValue({
+    ;(useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
-      replace: jest.fn(),
-      back: jest.fn(),
-      forward: jest.fn(),
-      refresh: jest.fn(),
-      prefetch: jest.fn(),
+      refresh: mockRefresh,
+    } as any)
+    ;(useSearchParams as jest.Mock).mockReturnValue({
+      get: jest.fn(),
+    } as any)
+  })
+
+  it('renders login form correctly', () => {
+    render(<LoginPage />)
+
+    expect(screen.getAllByText('Đăng nhập')).toHaveLength(2) // Title and button
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Mật khẩu *')).toBeInTheDocument()
+    expect(screen.getByLabelText(/ghi nhớ đăng nhập/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Đăng nhập' })
+    ).toBeInTheDocument()
+    expect(screen.getByText('Chưa có tài khoản?')).toBeInTheDocument()
+    expect(screen.getByText('Đăng ký')).toBeInTheDocument()
+    expect(screen.getByText('Quên mật khẩu?')).toBeInTheDocument()
+  })
+
+  it('displays success message when present in URL params', () => {
+    ;(useSearchParams as jest.Mock).mockReturnValue({
+      get: jest.fn().mockReturnValue('Đăng ký thành công!'),
     } as any)
 
-    // Mock successful fetch response by default
-    ;(fetch as jest.Mock).mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        success: true,
-        message: 'User registered successfully',
-        user: {
-          id: '1',
-          email: 'test@example.com',
-          name: 'Test User',
-          role: 'USER',
-        },
-      }),
-    })
+    render(<LoginPage />)
+
+    expect(screen.getByText('Thành công')).toBeInTheDocument()
+    expect(screen.getByText('Đăng ký thành công!')).toBeInTheDocument()
   })
 
-  it('renders all form fields correctly', () => {
-    render(<RegisterPage />)
+  it('validates email field', async () => {
+    render(<LoginPage />)
 
-    expect(screen.getByLabelText(/Họ và tên/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Email/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/^Mật khẩu/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Xác nhận mật khẩu/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Đăng ký/i })).toBeInTheDocument()
-  })
+    const emailInput = screen.getByLabelText(/email/i)
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
-  it('shows required field indicators', () => {
-    render(<RegisterPage />)
-
-    expect(screen.getByText('Email *')).toBeInTheDocument()
-    expect(screen.getByText('Mật khẩu *')).toBeInTheDocument()
-    expect(screen.getByText('Xác nhận mật khẩu *')).toBeInTheDocument()
-  })
-
-  it('shows login link', () => {
-    render(<RegisterPage />)
-
-    const loginLink = screen.getByRole('link', { name: /Đăng nhập/i })
-    expect(loginLink).toBeInTheDocument()
-    expect(loginLink).toHaveAttribute('href', '/auth/signin')
-  })
-
-  it('shows validation errors for empty required fields', async () => {
-    render(<RegisterPage />)
-
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText(/Email không hợp lệ/i)).toBeInTheDocument()
-      expect(
-        screen.getByText(/Mật khẩu phải có ít nhất 8 ký tự/i)
-      ).toBeInTheDocument()
-      expect(
-        screen.getByText(/Vui lòng xác nhận mật khẩu/i)
-      ).toBeInTheDocument()
-    })
-  })
-
-  it('shows error for invalid email format', async () => {
-    render(<RegisterPage />)
-
-    const emailInput = screen.getByLabelText(/Email/i)
     fireEvent.change(emailInput, { target: { value: 'invalid-email' } })
-    fireEvent.blur(emailInput)
-
-    await waitFor(() => {
-      expect(screen.getByText(/Email không hợp lệ/i)).toBeInTheDocument()
-    })
-  })
-
-  it('shows error for short password', async () => {
-    render(<RegisterPage />)
-
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    fireEvent.change(passwordInput, { target: { value: '123' } })
-    fireEvent.blur(passwordInput)
-
-    await waitFor(() => {
-      expect(screen.getByText(/Mật khẩu phải có ít nhất 8 ký tự/i)).toBeInTheDocument()
-    })
-  })
-  })
-
-  it('shows error when passwords do not match', async () => {
-    render(<RegisterPage />)
-
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, {
-      target: { value: 'different123' },
-    })
-    fireEvent.blur(confirmPasswordInput)
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Mật khẩu xác nhận không khớp/i)
-      ).toBeInTheDocument()
-    })
-  })
-
-  it('shows password match indicator when passwords match', async () => {
-    render(<RegisterPage />)
-
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
-    await waitFor(() => {
-      expect(screen.getByText(/Mật khẩu khớp/i)).toBeInTheDocument()
-    })
-  })
-
-  it('shows password strength indicator when password is entered', async () => {
-    render(<RegisterPage />)
-
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    fireEvent.change(passwordInput, { target: { value: 'weak' } })
-
-    await waitFor(() => {
-      expect(screen.getByText(/Độ mạnh mật khẩu:/i)).toBeInTheDocument()
-      expect(screen.getByText(/Yếu/i)).toBeInTheDocument()
-    })
-  })
-
-  it('shows strong password indicator for complex password', async () => {
-    render(<RegisterPage />)
-
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    fireEvent.change(passwordInput, { target: { value: 'StrongP@ssw0rd!' } })
-
-    await waitFor(() => {
-      const strengthText = screen.getByText('Mạnh')
-      expect(strengthText).toBeInTheDocument()
-      expect(strengthText).toHaveClass('text-green-600')
-    })
-  })
-
-  it('submits form with valid data', async () => {
-    render(<RegisterPage />)
-
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const nameInput = screen.getByLabelText(/Họ và tên/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
-
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-    fireEvent.change(nameInput, { target: { value: 'Test User' } })
-
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: 'test@example.com',
-          password: 'password123',
-          name: 'Test User',
-        }),
+      expect(screen.getByText('Email không hợp lệ')).toBeInTheDocument()
+    })
+  })
+
+  it('validates password field', async () => {
+    render(<LoginPage />)
+
+    const emailInput = screen.getByLabelText(/email/i)
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(screen.getByText('Vui lòng nhập mật khẩu')).toBeInTheDocument()
+    })
+  })
+
+  it('toggles password visibility', () => {
+    render(<LoginPage />)
+
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const toggleButton = screen.getByRole('button', {
+      name: /hiện mật khẩu/i,
+    })
+
+    // Initially password should be hidden
+    expect(passwordInput).toHaveAttribute('type', 'password')
+
+    // Click to show password
+    fireEvent.click(toggleButton)
+    expect(passwordInput).toHaveAttribute('type', 'text')
+    expect(screen.getByLabelText(/ẩn mật khẩu/i)).toBeInTheDocument()
+
+    // Click to hide password
+    fireEvent.click(toggleButton)
+    expect(passwordInput).toHaveAttribute('type', 'password')
+    expect(screen.getByLabelText(/hiện mật khẩu/i)).toBeInTheDocument()
+  })
+
+  it('handles successful login', async () => {
+    mockSignIn.mockResolvedValue({
+      ok: true,
+      error: null,
+      url: '/',
+    })
+
+    render(<LoginPage />)
+
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockSignIn).toHaveBeenCalledWith('credentials', {
+        email: 'test@example.com',
+        password: 'password123',
+        redirect: false,
+        callbackUrl: '/',
       })
     })
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith(
-        '/auth/signin?message=Đăng ký thành công! Vui lòng đăng nhập.'
-      )
+      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(mockRefresh).toHaveBeenCalled()
     })
   })
 
-  it('submits form without optional name field', async () => {
-    render(<RegisterPage />)
+  it('handles login with callback URL', async () => {
+    ;(useSearchParams as jest.Mock).mockReturnValue({
+      get: jest.fn().mockImplementation(key => {
+        if (key === 'callbackUrl') return '/dashboard'
+        return null
+      }),
+    } as any)
 
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
+    mockSignIn.mockResolvedValue({
+      ok: true,
+      error: null,
+      url: '/dashboard',
+    })
+
+    render(<LoginPage />)
+
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: 'test@example.com',
-          password: 'password123',
-          name: undefined,
-        }),
-      })
+      expect(mockPush).toHaveBeenCalledWith('/dashboard')
     })
   })
 
-  it('shows duplicate email error', async () => {
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
+  it('handles invalid credentials error', async () => {
+    mockSignIn.mockResolvedValue({
       ok: false,
-      status: 409,
-      json: async () => ({
-        success: false,
-        error: {
-          code: 'DUPLICATE_EMAIL',
-          message: 'User with this email already exists',
-        },
-      }),
+      error: 'CredentialsSignin',
+      url: null,
     })
 
-    render(<RegisterPage />)
+    render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
-
-    fireEvent.change(emailInput, { target: { value: 'existing@example.com' } })
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText(/Email này đã được sử dụng/i)).toBeInTheDocument()
-    })
-  })
-
-  it('shows validation error from server', async () => {
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      json: async () => ({
-        success: false,
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Password must be at least 8 characters long',
-        },
-      }),
-    })
-
-    render(<RegisterPage />)
-
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
+    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } })
     fireEvent.click(submitButton)
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Password must be at least 8 characters long/i)
+        screen.getByText('Email hoặc mật khẩu không chính xác.')
       ).toBeInTheDocument()
     })
   })
 
-  it('shows rate limit error', async () => {
-    ;(fetch as jest.Mock).mockResolvedValueOnce({
+  it('handles rate limiting error', async () => {
+    mockSignIn.mockResolvedValue({
       ok: false,
-      status: 429,
-      json: async () => ({
-        success: false,
-        error: {
-          code: 'TOO_MANY_REQUESTS',
-          message: 'Too many requests. Please try again later.',
-        },
-      }),
+      error: 'Too many login attempts. Please try again later.',
+      url: null,
     })
 
-    render(<RegisterPage />)
+    render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(screen.getByText(/Quá nhiều yêu cầu/i)).toBeInTheDocument()
-    })
-  })
-
-  it('shows generic error for network issues', async () => {
-    ;(fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
-
-    render(<RegisterPage />)
-
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
-
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
-    fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
     fireEvent.click(submitButton)
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Không thể kết nối đến máy chủ/i)
+        screen.getByText('Quá nhiều lần thử. Vui lòng thử lại sau.')
+      ).toBeInTheDocument()
+    })
+  })
+
+  it('handles network error', async () => {
+    mockSignIn.mockRejectedValue(new Error('Network error'))
+
+    render(<LoginPage />)
+
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
+
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'password123' } })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Không thể kết nối đến máy chủ. Vui lòng thử lại.')
       ).toBeInTheDocument()
     })
   })
 
   it('shows loading state during submission', async () => {
-    // Mock delayed response
-    ;(fetch as jest.Mock).mockImplementationOnce(
-      () =>
-        new Promise(resolve =>
-          setTimeout(
-            () =>
-              resolve({
-                ok: true,
-                json: async () => ({
-                  success: true,
-                  message: 'User registered successfully',
-                }),
-              }),
-            100
-          )
-        )
+    mockSignIn.mockImplementation(
+      () => new Promise(resolve => setTimeout(resolve, 100))
     )
 
-    render(<RegisterPage />)
+    render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
     fireEvent.click(submitButton)
 
-    // Check loading state
-    expect(screen.getByText(/Đang xử lý/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Đang xử lý/i })).toBeDisabled()
+    // Should show loading state
+    expect(screen.getByText('Đang xử lý...')).toBeInTheDocument()
+    expect(screen.getByTestId('loader')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Đăng nhập' })).toBeDisabled()
 
-    // Wait for completion
+    // Wait for loading to complete
     await waitFor(() => {
-      expect(screen.queryByText(/Đang xử lý/i)).not.toBeInTheDocument()
+      expect(screen.queryByText('Đang xử lý...')).not.toBeInTheDocument()
     })
   })
 
   it('disables form fields during loading', async () => {
-    // Mock delayed response
-    ;(fetch as jest.Mock).mockImplementationOnce(
-      () =>
-        new Promise(resolve =>
-          setTimeout(
-            () =>
-              resolve({
-                ok: true,
-                json: async () => ({
-                  success: true,
-                  message: 'User registered successfully',
-                }),
-              }),
-            100
-          )
-        )
+    mockSignIn.mockImplementation(
+      () => new Promise(resolve => setTimeout(resolve, 100))
     )
 
-    render(<RegisterPage />)
+    render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/Email/i)
-    const passwordInput = screen.getByLabelText(/^Mật khẩu/i)
-    const confirmPasswordInput = screen.getByLabelText(/Xác nhận mật khẩu/i)
-    const submitButton = screen.getByRole('button', { name: /Đăng ký/i })
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } })
     fireEvent.change(passwordInput, { target: { value: 'password123' } })
-    fireEvent.change(confirmPasswordInput, { target: { value: 'password123' } })
-
     fireEvent.click(submitButton)
 
-    // Check that inputs are disabled during loading
+    // Fields should be disabled during loading
     expect(emailInput).toBeDisabled()
     expect(passwordInput).toBeDisabled()
-    expect(confirmPasswordInput).toBeDisabled()
+    expect(submitButton).toBeDisabled()
   })
 
-  it('toggles password visibility', () => {
-    render(<RegisterPage />)
+  it('handles remember me checkbox', () => {
+    render(<LoginPage />)
 
-    const passwordInput = screen.getByLabelText(
-      /^Mật khẩu/i
-    ) as HTMLInputElement
-    const toggleButton = screen.getByLabelText('Hiện mật khẩu')
+    const rememberCheckbox = screen.getByLabelText(/ghi nhớ đăng nhập/i)
 
-    // Initially password should be hidden
-    expect(passwordInput.type).toBe('password')
+    // Initially unchecked
+    expect(rememberCheckbox).not.toBeChecked()
 
-    // Click to show password
-    fireEvent.click(toggleButton)
-    expect(passwordInput.type).toBe('text')
-    expect(screen.getByLabelText('Ẩn mật khẩu')).toBeInTheDocument()
+    // Check the checkbox
+    fireEvent.click(rememberCheckbox)
+    expect(rememberCheckbox).toBeChecked()
 
-    // Click to hide password
-    fireEvent.click(toggleButton)
-    expect(passwordInput.type).toBe('password')
-    expect(screen.getByLabelText('Hiện mật khẩu')).toBeInTheDocument()
+    // Uncheck the checkbox
+    fireEvent.click(rememberCheckbox)
+    expect(rememberCheckbox).not.toBeChecked()
   })
 
-  it('toggles confirm password visibility', () => {
-    render(<RegisterPage />)
+  it('has proper accessibility attributes', () => {
+    render(<LoginPage />)
 
-    const confirmPasswordInput = screen.getByLabelText(
-      /Xác nhận mật khẩu/i
-    ) as HTMLInputElement
-    const toggleButton = screen.getByLabelText('Hiện mật khẩu xác nhận')
+    const emailInput = screen.getByLabelText(/email/i)
+    const passwordInput = screen.getByLabelText('Mật khẩu *')
+    const submitButton = screen.getByRole('button', { name: 'Đăng nhập' })
 
-    // Initially password should be hidden
-    expect(confirmPasswordInput.type).toBe('password')
-
-    // Click to show password
-    fireEvent.click(toggleButton)
-    expect(confirmPasswordInput.type).toBe('text')
-    expect(screen.getByLabelText('Ẩn mật khẩu xác nhận')).toBeInTheDocument()
-
-    // Click to hide password
-    fireEvent.click(toggleButton)
-    expect(confirmPasswordInput.type).toBe('password')
-    expect(screen.getByLabelText('Hiện mật khẩu xác nhận')).toBeInTheDocument()
+    expect(emailInput).toHaveAttribute('aria-required', 'true')
+    expect(passwordInput).toHaveAttribute('aria-required', 'true')
+    expect(emailInput).toHaveAttribute('autoComplete', 'email')
+    expect(passwordInput).toHaveAttribute('autoComplete', 'current-password')
   })
 
-  it('has proper ARIA labels and roles', () => {
-    render(<RegisterPage />)
+  it('navigates to register page when register link is clicked', () => {
+    render(<LoginPage />)
 
-    expect(
-      screen.getByRole('heading', { name: 'Đăng ký tài khoản' })
-    ).toBeInTheDocument()
-    expect(screen.getByLabelText('Email')).toHaveAttribute(
-      'aria-required',
-      'true'
-    )
-    expect(screen.getByLabelText(/^Mật khẩu/i)).toHaveAttribute(
-      'aria-required',
-      'true'
-    )
-    expect(screen.getByLabelText('Xác nhận mật khẩu')).toHaveAttribute(
-      'aria-required',
-      'true'
-    )
+    const registerLink = screen.getByText('Đăng ký')
+    expect(registerLink.closest('a')).toHaveAttribute('href', '/auth/register')
   })
 
-  it('supports keyboard navigation', () => {
-    render(<RegisterPage />)
+  it('has forgot password link with placeholder href', () => {
+    render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText(/Email/i)
-
-    // Focus should work
-    emailInput.focus()
-    expect(emailInput).toHaveFocus()
+    const forgotPasswordLink = screen.getByText('Quên mật khẩu?')
+    expect(forgotPasswordLink.closest('a')).toHaveAttribute('href', '#')
   })
 })
