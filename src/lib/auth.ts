@@ -3,7 +3,6 @@ import Credentials from 'next-auth/providers/credentials'
 // import { PrismaAdapter } from '@auth/prisma-adapter' // Temporarily disabled due to type conflicts
 import { prisma } from './db'
 import { verifyPassword } from './password'
-import '../types/auth'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // adapter: PrismaAdapter(prisma), // Temporarily disabled due to type conflicts
