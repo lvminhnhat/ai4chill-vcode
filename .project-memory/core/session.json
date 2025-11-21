@@ -63,6 +63,54 @@
         "Expose basic CRUD APIs for products and orders",
         "Add database access patterns docs"
       ]
+    },
+    {
+      "id": "session-cicd-2025-11-21",
+      "startedAt": "2025-11-21T00:00:00Z",
+      "endedAt": "2025-11-21T00:15:00Z",
+      "performedBy": "developer",
+      "issueReference": "STORY-01-03 (#4)",
+      "branch": "feature/4-setup-cicd-pipeline",
+      "pr": {
+        "number": 5,
+        "url": "https://github.com/lvminhnhat/ai4chill-vcode/pull/5",
+        "status": "open"
+      },
+      "commits": [
+        { "hash": "264705b", "message": "Initial CI/CD configuration" },
+        {
+          "hash": "6f0d4ac",
+          "message": "chore: remove unused Supabase environment variables"
+        }
+      ],
+      "summary": "Set up initial CI/CD configuration for Vercel deployment; PR created and awaiting review.",
+      "details": {
+        "actions": [
+          "Added vercel.json with Vercel deployment configuration",
+          "Added .vercelignore to exclude build artifacts and unnecessary files",
+          "Updated package.json build script to run Prisma generate before build",
+          "Updated .env.example to remove unused Supabase keys and include DATABASE_URL",
+          "Cleaned up .gitignore entries"
+        ],
+        "filesChanged": [
+          "vercel.json (new)",
+          ".vercelignore (new)",
+          "package.json (modified)",
+          ".env.example (modified)",
+          ".gitignore (modified)"
+        ],
+        "findings": [
+          "Supabase is only used as managed PostgreSQL provider",
+          "All DB access goes through Prisma Client",
+          "No @supabase/supabase-js client or Supabase features (Auth/Realtime/Storage) in use",
+          "Only DATABASE_URL env variable is required"
+        ]
+      },
+      "nextSteps": [
+        "Await PR review and merge",
+        "After merge: configure Vercel project in UI (connect repo, set env vars, deploy)",
+        "Add automated checks (lint/test) to CI if desired"
+      ]
     }
   ]
 }

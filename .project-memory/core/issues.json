@@ -48,6 +48,56 @@
         "insertions": 420,
         "deletions": 5
       }
+    },
+    {
+      "id": 4,
+      "key": "STORY-01-03",
+      "title": "Setup CI/CD Pipeline",
+      "status": "in_progress",
+      "resolution": null,
+      "branch": "feature/4-setup-cicd-pipeline",
+      "pr": {
+        "number": 5,
+        "url": "https://github.com/lvminhnhat/ai4chill-vcode/pull/5",
+        "status": "open"
+      },
+      "commits": [
+        {
+          "hash": "264705b",
+          "message": "Initial CI/CD configuration"
+        },
+        {
+          "hash": "6f0d4ac",
+          "message": "chore: remove unused Supabase environment variables"
+        }
+      ],
+      "filesChanged": [
+        "vercel.json (new)",
+        ".vercelignore (new)",
+        "package.json (updated build script)",
+        ".env.example (cleaned up)",
+        ".gitignore (updated)"
+      ],
+      "details": [
+        "Created vercel.json with Vercel deployment configuration",
+        "Added .vercelignore to exclude unnecessary files from deployment",
+        "Updated package.json build script to include Prisma generation step",
+        "Cleaned up .env.example and removed unused Supabase variables (SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY)",
+        "Validated that Supabase is only used as a managed PostgreSQL provider and database access is via Prisma Client",
+        "PR created and awaiting review (PR #5)"
+      ],
+      "supabaseUsage": {
+        "used": true,
+        "role": "managed PostgreSQL provider only",
+        "clientLibraryPresent": false,
+        "featuresUsed": ["DATABASE_URL only"],
+        "notes": [
+          "No @supabase/supabase-js client in codebase",
+          "No Supabase Auth/Realtime/Storage features implemented",
+          "All DB interactions go through Prisma Client"
+        ]
+      },
+      "acceptanceCriteriaMet": false
     }
   ]
 }

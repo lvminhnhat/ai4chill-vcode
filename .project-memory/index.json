@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2",
-  "lastUpdated": "2025-11-20T12:00:00Z",
+  "version": "1.0.3",
+  "lastUpdated": "2025-11-21T00:15:00Z",
   "structure": {
     "core": ["project", "tech-stack", "git", "issues", "env", "session"],
     "architecture": ["patterns", "folder-structure", "dependencies"],
@@ -10,7 +10,15 @@
       "components": ["Button"],
       "services": ["types", "db", "test-db"],
       "utils": ["helpers"],
-      "config": ["tsconfig", "eslint", "prettier", "components"],
+      "config": [
+        "tsconfig",
+        "eslint",
+        "prettier",
+        "components",
+        "vercel",
+        "vercelignore",
+        "gitignore"
+      ],
       "prisma": ["schema", "migrations"],
       "generated": ["prisma-client"]
     }
