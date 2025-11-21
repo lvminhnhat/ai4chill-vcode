@@ -30,19 +30,21 @@ Hệ thống sử dụng **NextAuth v5** với **JWT strategy** để quản lý
 Middleware tự động chạy trước mỗi request và kiểm tra authentication status.
 
 **Chức năng:**
+
 - ✅ Bảo vệ protected routes (`/dashboard`, `/admin`)
 - ✅ Redirect unauthenticated users → `/auth/signin`
 - ✅ Redirect authenticated users khỏi auth pages
 - ✅ Role-based access control (ADMIN role)
 
 **Routes được protect:**
+
 ```typescript
 matcher: [
-  '/dashboard/:path*',  // Yêu cầu authentication
-  '/admin/:path*',      // Yêu cầu authentication + ADMIN role
-  '/auth/signin',       // Redirect nếu đã đăng nhập
-  '/auth/login',        // Redirect nếu đã đăng nhập
-  '/auth/register',     // Redirect nếu đã đăng nhập
+  '/dashboard/:path*', // Yêu cầu authentication
+  '/admin/:path*', // Yêu cầu authentication + ADMIN role
+  '/auth/signin', // Redirect nếu đã đăng nhập
+  '/auth/login', // Redirect nếu đã đăng nhập
+  '/auth/register', // Redirect nếu đã đăng nhập
 ]
 ```
 
@@ -73,6 +75,7 @@ Bộ công cụ để làm việc với session trong server components và API 
 **Functions:**
 
 #### `getServerSession()`
+
 Lấy session hiện tại từ server-side.
 
 ```typescript
@@ -83,6 +86,7 @@ if (session) {
 ```
 
 #### `requireAuth()`
+
 Bảo vệ server components - redirect nếu chưa đăng nhập.
 
 ```typescript
@@ -93,6 +97,7 @@ export default async function DashboardPage() {
 ```
 
 #### `getCurrentUser()`
+
 Lấy user object từ session.
 
 ```typescript
@@ -102,6 +107,7 @@ console.log('User role:', user?.role)
 ```
 
 #### `isAdmin(user)`
+
 Type guard kiểm tra admin role.
 
 ```typescript
@@ -112,6 +118,7 @@ if (user && isAdmin(user)) {
 ```
 
 #### `requireAdmin()`
+
 Bảo vệ admin-only routes.
 
 ```typescript
@@ -126,6 +133,7 @@ export default async function AdminPage() {
 Client component để logout user.
 
 **Features:**
+
 - ✅ Chỉ hiện khi user đã authenticated
 - ✅ Loading state với spinner
 - ✅ Error handling
@@ -138,15 +146,15 @@ Client component để logout user.
 <LogoutButton />
 
 // Custom style và redirect
-<LogoutButton 
-  variant="outline" 
+<LogoutButton
+  variant="outline"
   redirectTo="/login"
   children="Đăng xuất"
 />
 
 // Icon button
-<LogoutButton 
-  variant="ghost" 
+<LogoutButton
+  variant="ghost"
   size="icon"
   showIcon={true}
 />
@@ -157,6 +165,7 @@ Client component để logout user.
 Global header với user info và logout button.
 
 **Features:**
+
 - ✅ Hiển thị user email/name
 - ✅ Tích hợp LogoutButton
 - ✅ Responsive design
@@ -200,6 +209,7 @@ curl -b "session_cookie" http://localhost:3000/auth/login
 ## Security Features
 
 ### 1. JWT Strategy
+
 - ✅ Stateless authentication
 - ✅ Scalable (không cần database lookups)
 - ✅ httpOnly cookies (chống XSS)
@@ -222,8 +232,8 @@ cookies: {
 ```
 
 ### 3. Rate Limiting
-- Login attempts giới hạn: 100 requests/phút
-- Chống brute force attacks
+
+> **TODO**: Chưa được triển khai. Cần thêm rate limiting cho login/register endpoints để chống brute force attacks.
 
 ### 4. Callback URL Preservation
 
@@ -279,6 +289,7 @@ export async function GET(request: Request) {
 ### Session không persist sau refresh
 
 **Giải pháp:**
+
 - Kiểm tra cookie settings
 - Verify NEXTAUTH_SECRET trong `.env`
 - Check browser không block cookies
@@ -286,6 +297,7 @@ export async function GET(request: Request) {
 ### Middleware không redirect
 
 **Giải pháp:**
+
 - Verify matcher config trong `middleware.ts`
 - Check route path chính xác
 - Restart dev server
@@ -293,17 +305,20 @@ export async function GET(request: Request) {
 ### "NEXT_REDIRECT" error
 
 **Giải pháp:**
+
 - Đây là **behavior bình thường** khi middleware redirect
 - Không phải lỗi, là cách Next.js handle redirects
 
 ## Performance
 
 ### Middleware Performance
+
 - ✅ Chỉ chạy cho routes trong `matcher`
 - ✅ JWT validation rất nhanh (không cần database)
 - ✅ Không block static assets
 
 ### Session Caching
+
 - NextAuth tự động cache session
 - Client-side session được cache trong React context
 
