@@ -365,7 +365,7 @@ describe('/api/auth/register', () => {
     })
 
     // Act
-    const response = await POST(request as any)
+    await POST(request as any)
 
     // Assert
     expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
