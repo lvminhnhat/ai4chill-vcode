@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth'
+import { auth } from './src/lib/auth'
 
 export default auth(req => {
   // Handle protected routes here
