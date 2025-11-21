@@ -16,6 +16,13 @@ export default function SignInPage() {
     setError('')
     setLoading(true)
 
+    // Validate form inputs
+    if (!email || !password) {
+      setError('Vui lòng nhập email và mật khẩu')
+      setLoading(false)
+      return
+    }
+
     try {
       const result = await signIn('credentials', {
         email,
@@ -24,13 +31,17 @@ export default function SignInPage() {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        if (result.error.includes('Too many login attempts')) {
+          setError('Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau.')
+        } else {
+          setError('Email hoặc mật khẩu không đúng. Vui lòng thử lại.')
+        }
       } else {
         router.push('/')
         router.refresh()
       }
     } catch (error) {
-      setError('An error occurred. Please try again.')
+      setError('Đã xảy ra lỗi. Vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
@@ -41,19 +52,26 @@ export default function SignInPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Đăng nhập vào tài khoản của bạn
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={handleSubmit}
+          aria-label="Đăng nhập"
+        >
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+            <div
+              className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded"
+              role="alert"
+            >
               {error}
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
-                Email address
+                Địa chỉ email
               </label>
               <input
                 id="email"
@@ -61,15 +79,16 @@ export default function SignInPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Địa chỉ email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                aria-label="Địa chỉ email"
               />
             </div>
             <div>
               <label htmlFor="password" className="sr-only">
-                Password
+                Mật khẩu
               </label>
               <input
                 id="password"
@@ -77,10 +96,11 @@ export default function SignInPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Mật khẩu"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                aria-label="Mật khẩu"
               />
             </div>
           </div>
@@ -89,9 +109,10 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </div>
         </form>
