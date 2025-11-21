@@ -1,14 +1,33 @@
 import { auth } from './src/lib/auth'
 
 export default auth(req => {
-  // Handle protected routes here
-  // For example, redirect unauthenticated users from /dashboard
-  if (!req.auth && req.nextUrl.pathname.startsWith('/dashboard')) {
+  // Handle protected routes with role-based authorization
+  const { pathname } = req.nextUrl
+
+  // Protect dashboard routes - require authentication
+  if (pathname.startsWith('/dashboard') && !req.auth) {
     const newUrl = new URL('/auth/signin', req.nextUrl.origin)
+    newUrl.searchParams.set('callbackUrl', pathname)
     return Response.redirect(newUrl)
+  }
+
+  // Protect admin routes - require authentication and ADMIN role
+  if (pathname.startsWith('/admin')) {
+    if (!req.auth) {
+      const newUrl = new URL('/auth/signin', req.nextUrl.origin)
+      newUrl.searchParams.set('callbackUrl', pathname)
+      return Response.redirect(newUrl)
+    }
+
+    // Check if user has ADMIN role
+    const userRole = req.auth.user?.role
+    if (userRole !== 'ADMIN') {
+      const newUrl = new URL('/dashboard', req.nextUrl.origin)
+      return Response.redirect(newUrl)
+    }
   }
 })
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/dashboard/:path*', '/admin/:path*'],
 }
