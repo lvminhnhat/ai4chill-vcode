@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { hashPassword } from '@/lib/password'
 import { isValidEmail } from '@/lib/utils'
+import { registrationRateLimiter, getClientIP } from '@/lib/rate-limiter'
 
 interface RegisterRequest {
   email: string
@@ -20,20 +21,56 @@ interface RegisterResponse {
   }
 }
 
+interface ErrorResponse {
+  success: false
+  error: {
+    code: string
+    message: string
+  }
+}
+
 export async function POST(
   request: NextRequest
-): Promise<NextResponse<RegisterResponse>> {
+): Promise<NextResponse<RegisterResponse | ErrorResponse>> {
   try {
+    // Apply rate limiting
+    const clientIP = getClientIP(request)
+    const rateLimitResult = registrationRateLimiter.isAllowed(clientIP)
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'TOO_MANY_REQUESTS',
+            message: 'Too many requests. Please try again later.',
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': '100',
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': rateLimitResult.resetTime?.toString() || '',
+            'Retry-After': '60',
+          },
+        }
+      )
+    }
+
     // Parse request body
     let body: RegisterRequest
 
     try {
       body = await request.json()
-    } catch (parseError) {
+    } catch {
       return NextResponse.json(
         {
           success: false,
-          message: 'Invalid JSON in request body',
+          error: {
+            code: 'INVALID_JSON',
+            message: 'Invalid JSON in request body',
+          },
         },
         { status: 400 }
       )
@@ -44,7 +81,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'Email and password are required',
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Email and password are required',
+          },
         },
         { status: 400 }
       )
@@ -55,7 +95,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'Invalid email format',
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Invalid email format',
+          },
         },
         { status: 400 }
       )
@@ -66,7 +109,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'Password must be at least 8 characters long',
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Password must be at least 8 characters long',
+          },
         },
         { status: 400 }
       )
@@ -76,7 +122,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'Password must be less than 72 characters long',
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Password must be less than 72 characters long',
+          },
         },
         { status: 400 }
       )
@@ -93,7 +142,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'User with this email already exists',
+          error: {
+            code: 'DUPLICATE_EMAIL',
+            message: 'User with this email already exists',
+          },
         },
         { status: 409 }
       )
@@ -124,7 +176,15 @@ export async function POST(
         message: 'User registered successfully',
         user,
       },
-      { status: 201 }
+      {
+        status: 201,
+        headers: {
+          'X-RateLimit-Limit': '100',
+          'X-RateLimit-Remaining': registrationRateLimiter
+            .getRemainingRequests(clientIP)
+            .toString(),
+        },
+      }
     )
   } catch (error) {
     console.error('Registration error:', error)
@@ -134,7 +194,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: error.message,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: error.message,
+          },
         },
         { status: 400 }
       )
@@ -145,7 +208,10 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'User with this email already exists',
+          error: {
+            code: 'DUPLICATE_EMAIL',
+            message: 'User with this email already exists',
+          },
         },
         { status: 409 }
       )
@@ -155,7 +221,10 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        message: 'Internal server error',
+        error: {
+          code: 'SERVER_ERROR',
+          message: 'Internal server error',
+        },
       },
       { status: 500 }
     )

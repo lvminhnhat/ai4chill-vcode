@@ -11,6 +11,24 @@ export interface ApiError {
   code?: string
 }
 
+// Standardized error response format (Architecture spec Section 4.2)
+export interface StandardErrorResponse {
+  success: false
+  error: {
+    code: string
+    message: string
+  }
+}
+
+// Common error codes
+export const ERROR_CODES = {
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  DUPLICATE_EMAIL: 'DUPLICATE_EMAIL',
+  SERVER_ERROR: 'SERVER_ERROR',
+  INVALID_JSON: 'INVALID_JSON',
+  TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
+} as const
+
 // Base API configuration
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',

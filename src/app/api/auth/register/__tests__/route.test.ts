@@ -10,6 +10,11 @@ const mockPrisma = {
 
 const mockHashPassword = jest.fn() as any
 
+const mockRateLimiter = {
+  isAllowed: jest.fn().mockReturnValue({ allowed: true }),
+  getRemainingRequests: jest.fn(() => 100),
+}
+
 jest.mock('@/lib/db', () => ({
   prisma: mockPrisma,
 }))
@@ -22,6 +27,11 @@ jest.mock('@/lib/utils', () => ({
   isValidEmail: jest.fn((email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   ),
+}))
+
+jest.mock('@/lib/rate-limiter', () => ({
+  registrationRateLimiter: mockRateLimiter,
+  getClientIP: jest.fn(() => '127.0.0.1'),
 }))
 
 // Import after mocking
@@ -147,7 +157,8 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(400)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Email and password are required')
+    expect(data.error.code).toBe('VALIDATION_ERROR')
+    expect(data.error.message).toBe('Email and password are required')
   })
 
   it('should return 400 when email format is invalid', async () => {
@@ -172,7 +183,8 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(400)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Invalid email format')
+    expect(data.error.code).toBe('VALIDATION_ERROR')
+    expect(data.error.message).toBe('Invalid email format')
   })
 
   it('should return 400 when password is too short', async () => {
@@ -197,7 +209,10 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(400)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Password must be at least 8 characters long')
+    expect(data.error.code).toBe('VALIDATION_ERROR')
+    expect(data.error.message).toBe(
+      'Password must be at least 8 characters long'
+    )
   })
 
   it('should return 400 when password is too long', async () => {
@@ -222,7 +237,10 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(400)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Password must be less than 72 characters long')
+    expect(data.error.code).toBe('VALIDATION_ERROR')
+    expect(data.error.message).toBe(
+      'Password must be less than 72 characters long'
+    )
   })
 
   it('should return 409 when user already exists', async () => {
@@ -255,7 +273,8 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(409)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('User with this email already exists')
+    expect(data.error.code).toBe('DUPLICATE_EMAIL')
+    expect(data.error.message).toBe('User with this email already exists')
     expect(mockPrisma.user.create).not.toHaveBeenCalled()
   })
 
@@ -276,7 +295,8 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(400)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Invalid JSON in request body')
+    expect(data.error.code).toBe('INVALID_JSON')
+    expect(data.error.message).toBe('Invalid JSON in request body')
   })
 
   it('should handle password hashing errors', async () => {
@@ -304,7 +324,8 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(400)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Password hashing failed')
+    expect(data.error.code).toBe('VALIDATION_ERROR')
+    expect(data.error.message).toBe('Password hashing failed')
   })
 
   it('should handle database errors', async () => {
@@ -335,7 +356,8 @@ describe('/api/auth/register', () => {
     // Assert
     expect(response.status).toBe(500)
     expect(data.success).toBe(false)
-    expect(data.message).toBe('Internal server error')
+    expect(data.error.code).toBe('SERVER_ERROR')
+    expect(data.error.message).toBe('Internal server error')
   })
 
   it('should convert email to lowercase', async () => {
@@ -385,5 +407,79 @@ describe('/api/auth/register', () => {
         role: true,
       },
     })
+  })
+
+  it('should return 429 when rate limit is exceeded', async () => {
+    // Arrange
+    const userData = {
+      email: 'test@example.com',
+      password: 'password123',
+    }
+
+    // Mock rate limit exceeded
+    mockRateLimiter.isAllowed.mockReturnValue({
+      allowed: false,
+      resetTime: Date.now() + 60000,
+    } as any)
+
+    const request = new Request('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    // Act
+    const response = await POST(request as any)
+    const data = await response.json()
+
+    // Assert
+    expect(response.status).toBe(429)
+    expect(data.success).toBe(false)
+    expect(data.error.code).toBe('TOO_MANY_REQUESTS')
+    expect(data.error.message).toBe(
+      'Too many requests. Please try again later.'
+    )
+    expect(response.headers.get('Retry-After')).toBe('60')
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('100')
+    expect(response.headers.get('X-RateLimit-Remaining')).toBe('0')
+  })
+
+  it('should include rate limit headers on successful response', async () => {
+    // Arrange
+    const userData = {
+      email: 'test@example.com',
+      password: 'password123',
+    }
+
+    const createdUser = {
+      id: 'user_123',
+      email: 'test@example.com',
+      name: null,
+      role: 'USER',
+    }
+
+    mockPrisma.user.findUnique.mockResolvedValue(null)
+    mockHashPassword.mockResolvedValue('hashed_password')
+    mockPrisma.user.create.mockResolvedValue(createdUser)
+    mockRateLimiter.isAllowed.mockReturnValue({ allowed: true })
+    mockRateLimiter.getRemainingRequests.mockReturnValue(95)
+
+    const request = new Request('http://localhost:3000/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    // Act
+    const response = await POST(request as any)
+
+    // Assert
+    expect(response.status).toBe(201)
+    expect(response.headers.get('X-RateLimit-Limit')).toBe('100')
+    expect(response.headers.get('X-RateLimit-Remaining')).toBe('95')
   })
 })
