@@ -7,7 +7,7 @@ declare module 'next-auth' {
       id: string
       email: string
       name: string | null
-      // Note: role field removed - not in database schema
+      role: 'USER' | 'ADMIN'
     } & DefaultSession['user']
   }
 
@@ -15,7 +15,7 @@ declare module 'next-auth' {
     id: string
     email: string
     name: string | null
-    // Note: role field removed - not in database schema
+    role: 'USER' | 'ADMIN'
   }
 }
 
