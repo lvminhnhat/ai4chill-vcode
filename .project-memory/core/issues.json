@@ -161,6 +161,71 @@
         "allChangesCommitted": true,
         "readyForPushPR": true
       }
+    },
+    {
+      "id": 28,
+      "key": "STORY-04-01",
+      "title": "Sepay Payment Integration",
+      "status": "closed",
+      "resolution": "completed",
+      "completedDate": "2025-11-23",
+      "completedByCommit": "3455c2e",
+      "acceptanceCriteriaMet": true,
+      "details": [
+        "Sepay utility functions created for QR code generation with signature validation",
+        "Transaction model added to Prisma schema with migration (20251123000000_add_transaction_model)",
+        "Order creation server action with stock validation and atomic transactions",
+        "Webhook handler for Sepay payment notifications with security validation",
+        "Payment QR code component with real-time status polling",
+        "Test endpoints and scripts for development and integration testing",
+        "Comprehensive documentation and environment configuration",
+        "Security features: IP whitelist, signature validation, amount matching, idempotency"
+      ],
+      "components": [
+        "Sepay utility (/src/lib/sepay.ts)",
+        "Transaction model (Prisma)",
+        "Order creation action (/src/app/actions/create-order.ts)",
+        "Webhook handler (/src/app/api/webhooks/sepay/route.ts)",
+        "Payment QR Code component (/src/components/PaymentQRCode.tsx)",
+        "Test payment page (/src/app/test-payment/page.tsx)",
+        "Test scripts (/scripts/create-test-data.ts, /scripts/test-sepay-integration.ts)"
+      ],
+      "features": [
+        "QR code generation for payment",
+        "Order status updates via webhook",
+        "Transaction recording with audit trail",
+        "Security validation (IP whitelist, signature validation)",
+        "Idempotency handling to prevent duplicate processing",
+        "Real-time payment status checking",
+        "Comprehensive test suite",
+        "Error handling and logging"
+      ],
+      "filesCreated": [
+        "src/lib/sepay.ts",
+        "src/app/actions/create-order.ts",
+        "src/app/api/webhooks/sepay/route.ts",
+        "src/app/api/orders/create/route.ts",
+        "src/app/api/orders/[id]/status/route.ts",
+        "src/app/api/test/sepay-webhook/route.ts",
+        "src/components/PaymentQRCode.tsx",
+        "src/app/test-payment/page.tsx",
+        "scripts/create-test-data.ts",
+        "scripts/test-sepay-integration.ts",
+        "docs/SEPAY_INTEGRATION.md",
+        "prisma/migrations/20251123000000_add_transaction_model/migration.sql"
+      ],
+      "filesModified": [
+        "prisma/schema.prisma",
+        ".env.example",
+        "package.json",
+        ".project-memory/core/issues.json"
+      ],
+      "gitStats": {
+        "commit": "3455c2e",
+        "filesChanged": 17,
+        "insertions": 2459,
+        "deletions": 1
+      }
     }
   ]
 }

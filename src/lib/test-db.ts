@@ -38,6 +38,7 @@ async function testDatabaseConnection() {
         productId: product.id,
         name: 'Large',
         price: 29.99,
+        duration: '1 month',
         stock: 100,
       },
     })

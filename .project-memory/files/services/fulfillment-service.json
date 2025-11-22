@@ -1,0 +1,14 @@
+{
+  "path": "src/services/fulfillment.ts",
+  "type": "service",
+  "lastModified": "2025-11-23T11:36:00Z",
+  "dependencies": ["@/lib/db", "@/lib/email", "@/lib/encryption"],
+  "functions": [
+    "manualFulfill(orderId, items, metadata)",
+    "recordFulfillmentEvent(orderId, userId, note)"
+  ],
+  "notes": [
+    "Performs server-side fulfillment steps and sends emails via Resend",
+    "Records audit events for each fulfillment action"
+  ]
+}

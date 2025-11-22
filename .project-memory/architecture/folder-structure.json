@@ -7,10 +7,26 @@
     "services",
     "generated"
   ],
-  "src/app": ["layout.tsx", "page.tsx", "globals.css", "favicon.ico"],
-  "src/components": ["ui/button.tsx"],
-  "src/lib": ["utils.ts", "db.ts", "test-db.ts"],
-  "src/services": ["types.ts"],
-  "prisma": ["schema.prisma", "migrations/20251119173046_init/migration.sql"],
+  "src/app": [
+    "layout.tsx",
+    "page.tsx",
+    "globals.css",
+    "favicon.ico",
+    "(admin) (admin routes and layout)",
+    "api (api routes for payments, fulfillment, admin)"
+  ],
+  "src/components": [
+    "ui/button.tsx",
+    "admin (Admin components: Sidebar, InventoryList, OrderRow)",
+    "PaymentQRCode.tsx",
+    "FulfillmentFlow.tsx"
+  ],
+  "src/lib": ["utils.ts", "db.ts", "encryption.ts", "email.ts", "sepay.ts"],
+  "src/services": ["types.ts", "fulfillment.ts"],
+  "prisma": [
+    "schema.prisma",
+    "migrations/20251119173046_init/migration.sql",
+    "migrations/20251123000000_add_transaction_model/migration.sql"
+  ],
   "src/generated": ["prisma (generated client)"]
 }

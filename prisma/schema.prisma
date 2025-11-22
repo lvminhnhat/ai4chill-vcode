@@ -56,6 +56,7 @@ model Variant {
   productId String
   name      String
   price     Decimal  @db.Decimal(10, 2)
+  duration  String
   stock     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -63,7 +64,9 @@ model Variant {
   // Relations
   product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
+  accounts   Account[]
 
+  @@unique([productId, name])
   @@index([productId])
   @@map("variants")
 }
@@ -79,6 +82,7 @@ model Order {
   // Relations
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
+  transactions Transaction[]
 
   @@index([userId])
   @@map("orders")
@@ -105,8 +109,41 @@ model OrderItem {
   @@map("order_items")
 }
 
+model Account {
+  id          String   @id @default(cuid())
+  variantId   String
+  variant     Variant  @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  credentials String   // Encrypted JSON string of {email, password}
+  isSold      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([variantId])
+  @@index([isSold])
+  @@map("accounts")
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount      Decimal  @db.Decimal(10, 2)
+  status      String   // SUCCESS, FAILED, PENDING
+  provider    String   // SEPAY
+  gatewayData Json?    // Raw webhook payload
+  reference   String?  // Unique transaction reference for idempotency
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([orderId])
+  @@index([reference])
+  @@index([provider])
+  @@map("transactions")
+}
+
 enum OrderStatus {
   PENDING
+  PAID
   PROCESSING
   SHIPPED
   DELIVERED
