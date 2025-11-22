@@ -1,8 +1,30 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import { FeaturedProducts } from '../FeaturedProducts'
 
+// Mock the products module
+jest.mock('@/data/products', () => ({
+  getProducts: jest.fn().mockResolvedValue([
+    {
+      id: 'chatgpt-plus-1m',
+      title: 'ChatGPT Plus Subscription - 1 Month',
+      price: 150000,
+      originalPrice: 180000,
+      rating: 4.8,
+      image: '/images/products/chatgpt.jpg',
+      stock: 25,
+    },
+    {
+      id: 'claude-pro-1m',
+      title: 'Claude Pro Account - 1 Month',
+      price: 180000,
+      rating: 4.7,
+      image: '/images/products/claude.jpg',
+      stock: 15,
+    },
+  ]),
+}))
 // Mock ProductCard component
 jest.mock('../ProductCard', () => ({
   ProductCard: React.forwardRef(
@@ -41,14 +63,17 @@ jest.mock('../ProductCard', () => ({
 }))
 
 describe('FeaturedProducts', () => {
-  it('renders with default props', () => {
+  it('renders with default props', async () => {
     render(<FeaturedProducts />)
 
-    expect(screen.getByText('Sản phẩm nổi bật')).toBeInTheDocument()
-    expect(
-      screen.getByText('Các tài khoản AI được yêu thích nhất')
-    ).toBeInTheDocument()
-    expect(screen.getAllByTestId('product-card')).toHaveLength(8) // Default mock products
+    // Wait for products to load
+    await waitFor(() => {
+      expect(screen.getByText('Sản phẩm nổi bật')).toBeInTheDocument()
+      expect(
+        screen.getByText('Các tài khoản AI được yêu thích nhất')
+      ).toBeInTheDocument()
+      expect(screen.getAllByTestId('product-card')).toHaveLength(2) // Mocked products
+    })
   })
 
   it('renders with custom title and description', () => {
@@ -87,14 +112,14 @@ describe('FeaturedProducts', () => {
     expect(screen.getAllByTestId('product-card')).toHaveLength(2)
   })
 
-  it('renders with custom columns configuration', () => {
-    render(<FeaturedProducts columns={{ mobile: 2, tablet: 3, desktop: 4 }} />)
+  it('renders with custom columns configuration', async () => {
+    render(<FeaturedProducts columns={{ mobile: 2, tablet: 2, desktop: 3 }} />)
 
-    const container = screen.getByText('Sản phẩm nổi bật').closest('section')
-    expect(container).toBeInTheDocument()
-
-    // Check if grid classes are applied (this would need more specific testing based on implementation)
-    expect(screen.getAllByTestId('product-card')).toHaveLength(8)
+    // Wait for products to load
+    await waitFor(() => {
+      expect(screen.getByText('Sản phẩm nổi bật')).toBeInTheDocument()
+      expect(screen.getAllByTestId('product-card')).toHaveLength(2) // Mocked products
+    })
   })
 
   it('calls onAddToCart when button is clicked', () => {

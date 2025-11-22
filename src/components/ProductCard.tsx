@@ -18,8 +18,11 @@ export interface ProductCardProps {
   stock: number
   onAddToCart?: (id: string) => void
   priority?: boolean
+  loading?: 'lazy' | 'eager'
 }
 
+// Fallback image for error handling
+const FALLBACK_IMAGE = '/images/placeholder.jpg'
 const ProductCard = React.forwardRef<
   HTMLDivElement,
   ProductCardProps & React.HTMLAttributes<HTMLDivElement>
@@ -35,11 +38,13 @@ const ProductCard = React.forwardRef<
       stock,
       onAddToCart,
       priority = false,
+      loading,
       className,
       ...props
     },
     ref
   ) => {
+    const [imageSrc, setImageSrc] = React.useState(image)
     const getStockStatus = () => {
       if (stock === 0)
         return {
@@ -92,12 +97,17 @@ const ProductCard = React.forwardRef<
           {/* Product Image */}
           <div className="relative aspect-square overflow-hidden">
             <Image
-              src={image}
+              src={imageSrc}
               alt={title}
               fill
               className="object-cover transition-transform duration-200 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              loading={loading || (priority ? 'eager' : 'lazy')}
               {...(priority && { priority: true })}
+              onError={() => {
+                // Fallback to placeholder on error
+                setImageSrc(FALLBACK_IMAGE)
+              }}
             />
 
             {/* Discount Badge */}

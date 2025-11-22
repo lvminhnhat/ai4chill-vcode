@@ -5,7 +5,9 @@ import { ProductCard } from '@/components/ProductCard'
 
 const ExampleUsage = () => {
   const handleAddToCart = (productId: string) => {
-    console.log('Added to cart:', productId)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Added to cart:', productId)
+    }
     // Add your cart logic here
   }
 
