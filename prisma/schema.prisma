@@ -41,6 +41,9 @@ model Product {
   name        String
   description String?
   price       Decimal  @db.Decimal(10, 2)
+  image       String?
+  category    String?
+  slug        String?  @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

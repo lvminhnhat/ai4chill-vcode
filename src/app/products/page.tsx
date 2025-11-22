@@ -1,19 +1,22 @@
+import { Suspense } from 'react'
 import { ProductGrid } from '@/components/product/ProductGrid'
 import { ProductFilters } from '@/components/product/ProductFilters'
 import { MOCK_PRODUCTS } from '@/data/mock-products'
 import type { Product } from '@/types/product'
 
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     category?: string
     sort?: string
-  }
+  }>
 }
 
-export default function ProductsPage({ searchParams }: ProductsPageProps) {
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const params = await searchParams
+  
   // Parse URL parameters
-  const categoryParam = searchParams.category?.split('+').filter(Boolean) || []
-  const sortParam = searchParams.sort || 'newest'
+  const categoryParam = params.category?.split('+').filter(Boolean) || []
+  const sortParam = params.sort || 'newest'
 
   // Filter products by category
   let filteredProducts = MOCK_PRODUCTS.filter(product => {
@@ -41,7 +44,9 @@ export default function ProductsPage({ searchParams }: ProductsPageProps) {
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Filters Sidebar */}
       <aside className="w-full lg:w-80 flex-shrink-0">
-        <ProductFilters />
+        <Suspense fallback={<div>Loading filters...</div>}>
+          <ProductFilters />
+        </Suspense>
       </aside>
 
       {/* Products Grid */}

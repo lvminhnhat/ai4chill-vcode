@@ -1,6 +1,6 @@
 import { MOCK_PRODUCTS } from './mock-products'
 import { USE_MOCK_DATA } from '@/lib/feature-flags'
-import type { Product } from '@/components/FeaturedProducts'
+import type { Product } from '@/types/product'
 
 /**
  * Get products data with feature flag support

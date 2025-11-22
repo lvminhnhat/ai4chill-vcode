@@ -4,16 +4,8 @@ import * as React from 'react'
 import { ProductCard } from './ProductCard'
 import { cn } from '@/lib/utils'
 import { getProducts } from '@/data/products'
-
-export interface Product {
-  id: string
-  title: string
-  price: number
-  originalPrice?: number
-  rating: number
-  image: string
-  stock: number
-}
+import { useCart } from '@/stores/cart'
+import type { Product } from '@/types/product'
 
 export interface FeaturedProductsProps {
   products?: Product[]
@@ -76,9 +68,13 @@ const FeaturedProducts = React.forwardRef<
       return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
     }
 
+    const { addItem } = useCart()
+
     const handleAddToCart = (productId: string) => {
-      // TODO: Implement cart functionality
-      void productId // Prevent unused parameter warning
+      const product = products.find(p => p.id === productId)
+      if (product) {
+        addItem(product)
+      }
     }
 
     return (

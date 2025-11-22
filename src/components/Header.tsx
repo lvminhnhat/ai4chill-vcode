@@ -1,8 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { LogoutButton } from './LogoutButton'
-import { User } from 'lucide-react'
+import { CartDrawer } from './cart/CartDrawer'
+import { User, ShoppingBag } from 'lucide-react'
+import { useCart } from '@/stores/cart'
+import { Button } from '@/components/ui/button'
 
 /**
  * Header component with app branding and user authentication controls
@@ -16,6 +20,9 @@ import { User } from 'lucide-react'
  */
 export function Header() {
   const { data: session } = useSession()
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const { getItemCount } = useCart()
+  const itemCount = getItemCount()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -27,6 +34,21 @@ export function Header() {
           </div>
           <h1 className="text-lg font-semibold text-foreground">Auth App</h1>
         </div>
+
+        {/* Cart Button - Center */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="relative"
+          onClick={() => setIsCartOpen(true)}
+        >
+          <ShoppingBag className="h-5 w-5" />
+          {itemCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
+              {itemCount}
+            </span>
+          )}
+        </Button>
 
         {/* User Info and Logout - Right side */}
         {session && (
@@ -49,6 +71,9 @@ export function Header() {
             />
           </div>
         )}
+
+        {/* Cart Drawer */}
+        <CartDrawer open={isCartOpen} onOpenChange={setIsCartOpen} />
       </div>
     </header>
   )

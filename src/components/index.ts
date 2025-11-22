@@ -6,4 +6,5 @@ export { FeaturedProducts } from './FeaturedProducts'
 // Export types
 export type { HeroSectionProps } from './HeroSection'
 export type { TrustBarProps } from './TrustBar'
-export type { FeaturedProductsProps, Product } from './FeaturedProducts'
+export type { FeaturedProductsProps } from './FeaturedProducts'
+export type { Product } from '@/types/product'
