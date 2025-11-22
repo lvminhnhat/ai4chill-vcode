@@ -15,10 +15,13 @@ import {
   Trash2,
   Package,
   MoreHorizontal,
+  AlertTriangle,
 } from 'lucide-react'
 import { getProductById } from '@/app/actions/product-actions'
+import { getVariantStock } from '@/app/actions/inventory-actions'
 import { VariantFormDialog } from '@/components/products/VariantFormDialog'
 import { DeleteVariantDialog } from '@/components/products/DeleteVariantDialog'
+import { AddStockDialog } from '@/components/inventory/AddStockDialog'
 import {
   Table,
   TableBody,
@@ -74,6 +77,19 @@ export default async function ProductDetailPage({
       price: Number(variant.price),
     })),
   }
+
+  // Get stock information for each variant
+  const variantsWithStock = await Promise.all(
+    product.variants.map(async variant => {
+      const stock = await getVariantStock(variant.id)
+      return {
+        ...variant,
+        stock: stock.available,
+        totalStock: stock.total,
+        soldStock: stock.sold,
+      }
+    })
+  )
 
   return (
     <div className="p-6">
@@ -194,7 +210,7 @@ export default async function ProductDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {product.variants.map(variant => (
+                {variantsWithStock.map(variant => (
                   <TableRow key={variant.id}>
                     <TableCell className="font-medium">
                       <div>
@@ -213,11 +229,29 @@ export default async function ProductDetailPage({
                       <Badge variant="outline">{variant.duration}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={variant.stock > 0 ? 'default' : 'destructive'}
-                      >
-                        {variant.stock} in stock
-                      </Badge>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              variant.stock > 0 ? 'default' : 'destructive'
+                            }
+                          >
+                            {variant.stock} available
+                          </Badge>
+                          {variant.stock <= 5 && variant.stock > 0 && (
+                            <Badge
+                              variant="outline"
+                              className="text-yellow-700 border-yellow-300"
+                            >
+                              <AlertTriangle className="mr-1 h-3 w-3" />
+                              Low
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {variant.totalStock} total • {variant.soldStock} sold
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -227,35 +261,42 @@ export default async function ProductDetailPage({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <VariantFormDialog
-                              productId={product.id}
-                              variant={variant}
-                            >
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </VariantFormDialog>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <DeleteVariantDialog
-                              variantId={variant.id}
-                              variantName={variant.name}
-                              productId={product.id}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DeleteVariantDialog>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <div className="flex items-center justify-end gap-2">
+                        <AddStockDialog
+                          variantId={variant.id}
+                          variantName={variant.name}
+                          productName={product.name}
+                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <VariantFormDialog
+                                productId={product.id}
+                                variant={variant}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </VariantFormDialog>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <DeleteVariantDialog
+                                variantId={variant.id}
+                                variantName={variant.name}
+                                productId={product.id}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DeleteVariantDialog>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
