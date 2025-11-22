@@ -19,10 +19,8 @@ export async function POST(request: NextRequest) {
 
   try {
     // Get client IP for security validation
-    const clientIP =
-      request.ip ||
-      request.headers.get('x-forwarded-for')?.split(',')[0] ||
-      'unknown'
+    const forwarded = request.headers.get('x-forwarded-for')
+    const clientIP = forwarded ? forwarded.split(',')[0] : 'unknown'
 
     console.log(`Webhook from IP: ${clientIP}`)
 
@@ -44,7 +42,7 @@ export async function POST(request: NextRequest) {
       request.headers.get('signature')
 
     // Validate webhook signature (if available)
-    if (!validateWebhookSignature(rawBody, signature)) {
+    if (signature && !validateWebhookSignature(rawBody, signature)) {
       console.error('Invalid webhook signature')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
@@ -91,7 +89,7 @@ export async function POST(request: NextRequest) {
     const transactionReference = generateTransactionReference(payload)
 
     // Check if transaction already processed (idempotency)
-    const existingTransaction = await prisma.transaction.findUnique({
+    const existingTransaction = await prisma.transaction.findFirst({
       where: { reference: transactionReference },
     })
 

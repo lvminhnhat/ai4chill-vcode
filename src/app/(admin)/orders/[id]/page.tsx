@@ -34,11 +34,14 @@ import {
 import Link from 'next/link'
 import { OrderStatus } from '@/generated/prisma'
 import { OrderStatusUpdateForm } from '@/components/orders/OrderStatusUpdateForm'
+import { FulfillOrderButton } from '@/components/orders/FulfillOrderButton'
+import { OrderStockValidation } from '@/components/orders/OrderStockValidation'
+import { checkOrderStockAvailability } from '@/app/actions/order-actions'
 
 interface OrderDetailPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 const statusConfig = {
@@ -46,6 +49,11 @@ const statusConfig = {
     label: 'Pending',
     icon: Clock,
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  },
+  PAID: {
+    label: 'Paid',
+    icon: DollarSign,
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
   },
   PROCESSING: {
     label: 'Processing',
@@ -91,10 +99,29 @@ export default async function OrderDetailPage({
 }: OrderDetailPageProps) {
   await requireAdmin()
 
-  const order = (await getOrderById(params.id)) as any
+  const { id } = await params
+  const order = (await getOrderById(id)) as any
 
   if (!order) {
     notFound()
+  }
+
+  // Check stock availability for PAID orders
+  let hasSufficientStock = true
+  if (order.status === 'PAID') {
+    try {
+      const stockCheck = await checkOrderStockAvailability(
+        order.orderItems.map((item: any) => ({
+          variantId: item.variant.id,
+          quantity: item.quantity,
+        }))
+      )
+      hasSufficientStock = stockCheck.hasSufficientStock
+    } catch (error) {
+      console.error('Error checking stock:', error)
+      // Default to false if we can't check stock
+      hasSufficientStock = false
+    }
   }
 
   const statusInfo = statusConfig[order.status as OrderStatus]
@@ -128,6 +155,12 @@ export default async function OrderDetailPage({
               <StatusIcon className="h-4 w-4" />
               <span>{statusInfo.label}</span>
             </Badge>
+
+            <FulfillOrderButton
+              orderId={order.id}
+              orderStatus={order.status}
+              hasSufficientStock={hasSufficientStock}
+            />
 
             {canUpdateStatus && (
               <OrderStatusUpdateForm
@@ -184,6 +217,21 @@ export default async function OrderDetailPage({
               </div>
             </CardContent>
           </Card>
+
+          {/* Stock Validation for PAID orders */}
+          {order.status === 'PAID' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Package className="mr-2 h-5 w-5" />
+                  Stock Availability
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <OrderStockValidation orderItems={order.orderItems} />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Order Items */}
           <Card>
@@ -312,6 +360,28 @@ export default async function OrderDetailPage({
                 </div>
 
                 {order.status !== 'PENDING' && (
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className={`w-3 h-3 rounded-full ${
+                        ['PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED'].includes(
+                          order.status
+                        )
+                          ? 'bg-green-500'
+                          : 'bg-gray-300'
+                      }`}
+                    />
+                    <div>
+                      <p className="font-medium">Paid</p>
+                      <p className="text-sm text-gray-500">
+                        Payment received successfully
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {['PROCESSING', 'SHIPPED', 'DELIVERED'].includes(
+                  order.status
+                ) && (
                   <div className="flex items-center space-x-3">
                     <div
                       className={`w-3 h-3 rounded-full ${

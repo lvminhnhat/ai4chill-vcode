@@ -15,6 +15,8 @@
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
     "create-test-data": "tsx scripts/create-test-data.ts",
+    "create-fulfillment-test-data": "tsx scripts/create-fulfillment-test-data.ts",
+    "test-fulfillment": "tsx scripts/test-fulfillment-flow.ts",
     "test-sepay": "tsx scripts/test-sepay-integration.ts"
   },
   "dependencies": {
@@ -36,6 +38,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.66.1",
+    "resend": "^6.5.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12"
@@ -47,7 +50,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20",
+    "@types/node": "^20.19.25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

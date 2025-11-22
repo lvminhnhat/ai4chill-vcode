@@ -37,15 +37,19 @@ async function createTestData() {
     // 2. Create test product
     console.log('2️⃣ Creating test product...')
 
-    const testProduct = await prisma.product.upsert({
+    let testProduct = await prisma.product.findFirst({
       where: { name: 'ChatGPT Plus Subscription' },
-      update: {},
-      create: {
-        name: 'ChatGPT Plus Subscription',
-        description: 'Monthly subscription to ChatGPT Plus with all features',
-        price: 99000, // 99,000 VND
-      },
     })
+
+    if (!testProduct) {
+      testProduct = await prisma.product.create({
+        data: {
+          name: 'ChatGPT Plus Subscription',
+          description: 'Monthly subscription to ChatGPT Plus with all features',
+          price: 99000, // 99,000 VND
+        },
+      })
+    }
 
     console.log('✅ Test product created/updated!')
     console.log(`   Product ID: ${testProduct.id}`)
@@ -79,26 +83,24 @@ async function createTestData() {
     const createdVariants = []
 
     for (const variantData of variants) {
-      const variant = await prisma.variant.upsert({
+      let variant = await prisma.variant.findFirst({
         where: {
-          productId_name: {
-            productId: testProduct.id,
-            name: variantData.name,
-          },
-        },
-        update: {
-          price: variantData.price,
-          duration: variantData.duration,
-          stock: variantData.stock,
-        },
-        create: {
           productId: testProduct.id,
           name: variantData.name,
-          duration: variantData.duration,
-          price: variantData.price,
-          stock: variantData.stock,
         },
       })
+
+      if (!variant) {
+        variant = await prisma.variant.create({
+          data: {
+            productId: testProduct.id,
+            name: variantData.name,
+            duration: variantData.duration,
+            price: variantData.price,
+            stock: variantData.stock,
+          },
+        })
+      }
 
       createdVariants.push(variant)
       console.log(

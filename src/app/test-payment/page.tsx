@@ -278,12 +278,8 @@ export default function PaymentTestPage() {
               <code className="block p-2 bg-gray-100 rounded text-xs">
                 curl -X POST http://localhost:3000/api/test/sepay-webhook {'\n'}
                 {'  '}-H "Content-Type: application/json" {'\n'}
-                {'  '}-d '
-                {{
-                  orderId: "' + (orderResult?.orderId || 'ORDER_ID') + '",
-                  amount: ' + totalAmount + ',
-                }}
-                '
+                {'  '}-d '{'{'} orderId: "{orderResult?.orderId || 'ORDER_ID'}",
+                amount: {totalAmount},{' }'}'
               </code>
             </div>
 

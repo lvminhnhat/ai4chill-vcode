@@ -43,10 +43,11 @@ import { ProductWithVariants } from '@/types/product'
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   await requireAdmin()
-  const productData = await getProductById(params.id)
+  const { id } = await params
+  const productData = await getProductById(id)
 
   if (!productData) {
     return (

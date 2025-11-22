@@ -53,6 +53,10 @@ const statusConfig = {
     label: 'Pending',
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   },
+  PAID: {
+    label: 'Paid',
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
+  },
   PROCESSING: {
     label: 'Processing',
     color: 'bg-blue-100 text-blue-800 border-blue-200',

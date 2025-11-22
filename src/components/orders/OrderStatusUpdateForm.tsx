@@ -32,6 +32,11 @@ const statusConfig = {
     icon: Package,
     color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   },
+  PAID: {
+    label: 'Paid',
+    icon: CheckCircle,
+    color: 'bg-green-100 text-green-800 border-green-200',
+  },
   PROCESSING: {
     label: 'Processing',
     icon: Package,
@@ -56,6 +61,7 @@ const statusConfig = {
 
 const statusTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ['PROCESSING', 'CANCELLED'],
+  PAID: ['PROCESSING', 'CANCELLED'],
   PROCESSING: ['SHIPPED', 'CANCELLED'],
   SHIPPED: ['DELIVERED'],
   DELIVERED: [],
