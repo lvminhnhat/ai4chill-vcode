@@ -1,4 +1,5 @@
-import { mockProducts } from './mock-products'
+import { MOCK_PRODUCTS } from './mock-products'
+import { USE_MOCK_DATA } from '@/lib/feature-flags'
 import type { Product } from '@/components/FeaturedProducts'
 
 /**
@@ -11,8 +12,8 @@ import type { Product } from '@/components/FeaturedProducts'
  */
 export async function getProducts(): Promise<Product[]> {
   // Feature flag for mock data usage
-  if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
-    return mockProducts
+  if (USE_MOCK_DATA) {
+    return MOCK_PRODUCTS
   }
 
   // Future: Real API call
@@ -23,7 +24,7 @@ export async function getProducts(): Promise<Product[]> {
   // return response.json()
 
   // Fallback to mock data for now
-  return mockProducts
+  return MOCK_PRODUCTS
 }
 
 /**

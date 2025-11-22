@@ -4,7 +4,7 @@ import Credentials from 'next-auth/providers/credentials'
 import { prisma } from './db'
 import { verifyPassword } from './password'
 import { InMemoryRateLimiter, getClientIP } from './rate-limiter'
-import type { JWT } from 'next-auth/jwt'
+import { COOKIE_DOMAIN } from './feature-flags'
 
 // Environment validation
 if (!process.env.NEXTAUTH_SECRET) {
@@ -118,7 +118,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         path: '/',
         secure: process.env.NODE_ENV === 'production',
         maxAge: 30 * 24 * 60 * 60, // Explicit 30 days
-        domain: process.env.COOKIE_DOMAIN || undefined, // Configurable domain
+        domain: COOKIE_DOMAIN, // Configurable domain from feature flags
       },
     },
     callbackUrl: {

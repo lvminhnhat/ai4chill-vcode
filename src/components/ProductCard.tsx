@@ -18,6 +18,7 @@ export interface ProductCardProps {
   stock: number
   onAddToCart?: (id: string) => void
   priority?: boolean
+  loading?: 'lazy' | 'eager'
 }
 
 // Fallback image for error handling
@@ -38,6 +39,7 @@ const ProductCard = React.forwardRef<
       stock,
       onAddToCart,
       priority = false,
+      loading,
       className,
       ...props
     },
@@ -102,6 +104,7 @@ const ProductCard = React.forwardRef<
               fill
               className="object-cover transition-transform duration-200 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+              loading={loading || (priority ? 'eager' : 'lazy')}
               {...(priority && { priority: true })}
               onError={() => {
                 // Fallback to placeholder on error

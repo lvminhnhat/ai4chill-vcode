@@ -115,7 +115,8 @@ const FeaturedProducts = React.forwardRef<
                   <ProductCard
                     key={product.id}
                     {...product}
-                    priority={index < 6} // Priority for first 6 products (above fold)
+                    priority={index < 6 ? true : false} // Priority for first 6 products (above fold)
+                    loading={index < 6 ? 'eager' : 'lazy'} // Lazy load for products below fold
                     onAddToCart={handleAddToCart}
                   />
                 ))}
