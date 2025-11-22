@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache'
 import {
   ProductFormSchema,
   ProductFormData,
+  VariantFormSchema,
+  VariantFormData,
 } from '@/lib/schemas/product-schema'
 
 // Get all products with variants count
@@ -217,6 +219,155 @@ export async function deleteProduct(id: string) {
     return {
       success: false,
       error: 'Failed to delete product',
+    }
+  }
+}
+
+// Create new variant
+export async function createVariant(productId: string, data: VariantFormData) {
+  try {
+    const validatedData = VariantFormSchema.parse(data)
+
+    // Check if product exists
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    })
+
+    if (!product) {
+      return {
+        success: false,
+        error: 'Product not found',
+      }
+    }
+
+    const variant = await prisma.variant.create({
+      data: {
+        productId,
+        name: validatedData.name,
+        price: validatedData.price,
+        duration: validatedData.duration,
+        stock: validatedData.stock,
+      },
+    })
+
+    revalidatePath(`/admin/products/${productId}`)
+    revalidatePath('/admin/products')
+    return { success: true, variant }
+  } catch (error) {
+    console.error('Error creating variant:', error)
+
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        details: error.issues,
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Failed to create variant',
+    }
+  }
+}
+
+// Update existing variant
+export async function updateVariant(id: string, data: VariantFormData) {
+  try {
+    const validatedData = VariantFormSchema.parse(data)
+
+    // Check if variant exists
+    const existingVariant = await prisma.variant.findUnique({
+      where: { id },
+      include: {
+        product: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    })
+
+    if (!existingVariant) {
+      return {
+        success: false,
+        error: 'Variant not found',
+      }
+    }
+
+    const variant = await prisma.variant.update({
+      where: { id },
+      data: {
+        name: validatedData.name,
+        price: validatedData.price,
+        duration: validatedData.duration,
+        stock: validatedData.stock,
+      },
+    })
+
+    revalidatePath(`/admin/products/${existingVariant.productId}`)
+    revalidatePath('/admin/products')
+    return { success: true, variant }
+  } catch (error) {
+    console.error('Error updating variant:', error)
+
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        error: 'Validation failed',
+        details: error.issues,
+      }
+    }
+
+    return {
+      success: false,
+      error: 'Failed to update variant',
+    }
+  }
+}
+
+// Delete variant
+export async function deleteVariant(id: string) {
+  try {
+    // Check if variant exists and get order items count
+    const variant = await prisma.variant.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            orderItems: true,
+          },
+        },
+      },
+    })
+
+    if (!variant) {
+      return {
+        success: false,
+        error: 'Variant not found',
+      }
+    }
+
+    // Check if variant has order items
+    if (variant._count.orderItems > 0) {
+      return {
+        success: false,
+        error: 'Cannot delete variant with existing orders.',
+      }
+    }
+
+    await prisma.variant.delete({
+      where: { id },
+    })
+
+    revalidatePath(`/admin/products/${variant.productId}`)
+    revalidatePath('/admin/products')
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting variant:', error)
+    return {
+      success: false,
+      error: 'Failed to delete variant',
     }
   }
 }

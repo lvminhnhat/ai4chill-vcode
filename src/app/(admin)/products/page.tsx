@@ -16,6 +16,7 @@ import {
   Edit,
   Trash2,
   MoreHorizontal,
+  Eye,
 } from 'lucide-react'
 import { getProducts } from '@/app/actions/product-actions'
 import { ProductFormDialog } from '@/components/products/ProductFormDialog'
@@ -35,6 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import Link from 'next/link'
 
 export default async function AdminProductsPage() {
   await requireAdmin()
@@ -115,7 +117,12 @@ export default async function AdminProductsPage() {
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">
                       <div>
-                        <div className="font-semibold">{product.name}</div>
+                        <Link
+                          href={`/admin/products/${product.id}`}
+                          className="font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {product.name}
+                        </Link>
                         <div className="text-sm text-gray-500">
                           ID: {product.id}
                         </div>
@@ -159,9 +166,15 @@ export default async function AdminProductsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
+                            <Link href={`/admin/products/${product.id}`}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
                             <ProductFormDialog product={product}>
                               <Edit className="mr-2 h-4 w-4" />
-                              Edit
+                              Edit Product
                             </ProductFormDialog>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
