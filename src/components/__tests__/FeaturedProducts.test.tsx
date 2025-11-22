@@ -25,7 +25,6 @@ jest.mock('@/data/products', () => ({
     },
   ]),
 }))
-
 // Mock ProductCard component
 jest.mock('../ProductCard', () => ({
   ProductCard: React.forwardRef(

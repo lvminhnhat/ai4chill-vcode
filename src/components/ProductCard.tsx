@@ -23,7 +23,6 @@ export interface ProductCardProps {
 
 // Fallback image for error handling
 const FALLBACK_IMAGE = '/images/placeholder.jpg'
-
 const ProductCard = React.forwardRef<
   HTMLDivElement,
   ProductCardProps & React.HTMLAttributes<HTMLDivElement>
@@ -46,7 +45,6 @@ const ProductCard = React.forwardRef<
     ref
   ) => {
     const [imageSrc, setImageSrc] = React.useState(image)
-
     const getStockStatus = () => {
       if (stock === 0)
         return {
