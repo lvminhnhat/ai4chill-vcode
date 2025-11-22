@@ -66,6 +66,7 @@ model Variant {
   orderItems OrderItem[]
   accounts   Account[]
 
+  @@unique([productId, name])
   @@index([productId])
   @@map("variants")
 }
@@ -81,6 +82,7 @@ model Order {
   // Relations
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   orderItems OrderItem[]
+  transactions Transaction[]
 
   @@index([userId])
   @@map("orders")
@@ -121,8 +123,27 @@ model Account {
   @@map("accounts")
 }
 
+model Transaction {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount      Decimal  @db.Decimal(10, 2)
+  status      String   // SUCCESS, FAILED, PENDING
+  provider    String   // SEPAY
+  gatewayData Json?    // Raw webhook payload
+  reference   String?  // Unique transaction reference for idempotency
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([orderId])
+  @@index([reference])
+  @@index([provider])
+  @@map("transactions")
+}
+
 enum OrderStatus {
   PENDING
+  PAID
   PROCESSING
   SHIPPED
   DELIVERED

@@ -161,6 +161,34 @@
         "allChangesCommitted": true,
         "readyForPushPR": true
       }
+    },
+    {
+      "id": 28,
+      "key": "STORY-04-01",
+      "title": "Sepay Payment Integration",
+      "status": "in_progress",
+      "resolution": null,
+      "acceptanceCriteriaMet": false,
+      "details": [
+        "Sepay utility functions created for QR code generation",
+        "Transaction model added to Prisma schema with migration",
+        "Order creation server action with Sepay integration",
+        "Webhook handler for Sepay payment notifications",
+        "Security validation and idempotency handling"
+      ],
+      "components": [
+        "Sepay utility (/src/lib/sepay.ts)",
+        "Transaction model (Prisma)",
+        "Order creation action (/src/app/actions/create-order.ts)",
+        "Webhook handler (/src/app/api/webhooks/sepay/route.ts)"
+      ],
+      "features": [
+        "QR code generation for payment",
+        "Order status updates via webhook",
+        "Transaction recording",
+        "Security validation",
+        "Idempotency handling"
+      ]
     }
   ]
 }
