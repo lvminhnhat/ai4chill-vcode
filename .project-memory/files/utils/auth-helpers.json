@@ -1,0 +1,15 @@
+{
+  "path": "src/lib/auth.ts",
+  "type": "utility",
+  "lastModified": "2025-11-23T11:10:00Z",
+  "functions": [
+    "extendSessionWithRoles(session, user)",
+    "requireAdmin(session)",
+    "getUserFromSession(request)"
+  ],
+  "notes": [
+    "NextAuth session extended to include roles on sign-in",
+    "requireAdmin() helper throws a 403/redirects if user is not an admin",
+    "Middleware uses these helpers to protect /admin routes"
+  ]
+}

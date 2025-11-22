@@ -1,0 +1,16 @@
+{
+  "path": "src/lib/sepay.ts",
+  "type": "service",
+  "lastModified": "2025-11-23T11:35:00Z",
+  "dependencies": ["node-fetch|axios", "crypto", "qrcode"],
+  "functions": [
+    "createPaymentSession(order, amount)",
+    "verifyWebhook(req)",
+    "getTransactionStatus(id)"
+  ],
+  "notes": [
+    "Creates Sepay payment payload and returns tokenized QR data",
+    "Verifies webhook signatures and updates Transaction records",
+    "Idempotency keys supported when creating payments"
+  ]
+}
