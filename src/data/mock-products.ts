@@ -1,4 +1,4 @@
-import type { Product } from '@/components/FeaturedProducts'
+import type { Product } from '@/types/product'
 
 /**
  * ⚠️ DEMO DATA - For development and preview only
@@ -16,6 +16,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.8,
     image: '/images/products/chatgpt.jpg',
     stock: 50,
+    category: 'AI Chat',
   },
   {
     id: '2',
@@ -25,6 +26,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.9,
     image: '/images/products/chatgpt-team.jpg',
     stock: 30,
+    category: 'AI Chat',
   },
   {
     id: '3',
@@ -33,6 +35,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.7,
     image: '/images/products/claude-api.jpg',
     stock: 40,
+    category: 'AI Chat',
   },
   {
     id: '4',
@@ -41,6 +44,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.6,
     image: '/images/products/claude.jpg',
     stock: 45,
+    category: 'AI Chat',
   },
   {
     id: '5',
@@ -49,6 +53,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.5,
     image: '/images/products/dalle.jpg',
     stock: 60,
+    category: 'AI Art',
   },
   {
     id: '6',
@@ -57,6 +62,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.7,
     image: '/images/products/gemini.jpg',
     stock: 35,
+    category: 'AI Chat',
   },
   {
     id: '7',
@@ -65,6 +71,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.8,
     image: '/images/products/github-copilot.jpg',
     stock: 50,
+    category: 'AI Coding',
   },
   {
     id: '8',
@@ -73,6 +80,7 @@ export const MOCK_PRODUCTS: Product[] = [
     rating: 4.9,
     image: '/images/products/midjourney.jpg',
     stock: 25,
+    category: 'AI Art',
   },
 ]
 
