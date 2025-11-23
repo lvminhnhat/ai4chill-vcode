@@ -1,0 +1,24 @@
+{
+  "path": "src/app/(admin)/inventory/page.tsx",
+  "type": "component",
+  "lastModified": "2025-11-23T11:40:00Z",
+  "dependencies": [
+    "react",
+    "@/lib/db",
+    "@/services/encryption",
+    "@/components/ui/form"
+  ],
+  "props": {},
+  "patterns": {
+    "credentials": "Encrypted credentials stored in Account model; decrypted on server when needed",
+    "actions": "Server Actions used to add/update inventory and perform external account syncs"
+  },
+  "relatedFiles": [
+    "src/components/admin/InventoryList.tsx",
+    "src/components/admin/AddInventoryDialog.tsx"
+  ],
+  "notes": [
+    "Inventory management supports encrypted external account credentials",
+    "Server Actions perform communication with external inventory providers using decrypted credentials"
+  ]
+}

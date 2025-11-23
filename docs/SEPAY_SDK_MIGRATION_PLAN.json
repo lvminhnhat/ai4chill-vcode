@@ -1,0 +1,1137 @@
+{
+  "migrationPlan": {
+    "version": "1.0.0",
+    "createdAt": "2025-11-23",
+    "issueReference": "#28 STORY-04-01 (SDK Migration)",
+
+    "analysis": {
+      "currentImplementation": {
+        "description": "Custom QR code generation without official SDK",
+        "components": [
+          {
+            "file": "src/lib/sepay.ts",
+            "purpose": "Custom QR URL generation and webhook utilities",
+            "methods": [
+              "generateQRUrl() - Creates QR code URL with URL parameters",
+              "validateWebhookSignature() - Basic HMAC signature validation",
+              "extractOrderIdFromDescription() - Parses order ID from description",
+              "validateWebhookPayload() - Validates webhook structure",
+              "isAllowedIP() - IP whitelist validation"
+            ]
+          },
+          {
+            "file": "src/app/api/webhooks/sepay/route.ts",
+            "purpose": "Webhook handler for payment notifications",
+            "flow": "Receives webhook -> Validates -> Updates order status to PAID -> Creates transaction record"
+          },
+          {
+            "file": "src/components/PaymentQRCode.tsx",
+            "purpose": "Client component displaying QR code and polling payment status",
+            "features": [
+              "QR code display",
+              "Auto-polling every 10 seconds",
+              "Payment status tracking",
+              "User instructions"
+            ]
+          },
+          {
+            "file": "src/app/actions/create-order.ts",
+            "purpose": "Server action to create order and generate QR URL",
+            "flow": "Validate items -> Create order -> Decrement stock -> Generate QR URL"
+          }
+        ],
+        "limitations": [
+          "No official SDK - manual QR generation",
+          "Limited to basic QR payment method",
+          "Manual signature validation",
+          "No support for multiple payment methods (CARD, NAPAS_QR)",
+          "No checkout form redirection flow",
+          "Polling-based status checking (inefficient)",
+          "Missing IPN (Instant Payment Notification) proper handling"
+        ]
+      },
+
+      "newImplementation": {
+        "description": "Official SDK with checkout form and IPN support",
+        "sdkPackage": "sepay-pg-node",
+        "advantages": [
+          "Official SDK maintained by SePay",
+          "Support multiple payment methods: BANK_TRANSFER, CARD, NAPAS_BANK_TRANSFER",
+          "Automatic signature generation",
+          "Checkout form redirection flow",
+          "Proper IPN webhook handling",
+          "Order management API methods",
+          "Production-ready security"
+        ],
+        "paymentFlow": {
+          "steps": [
+            "1. User selects products and creates order",
+            "2. System generates checkout form with signed fields",
+            "3. Form submits to SePay payment gateway (POST)",
+            "4. User completes payment on SePay platform",
+            "5. SePay redirects back based on result (success/error/cancel URLs)",
+            "6. SePay sends IPN notification to backend",
+            "7. System updates order status and displays result"
+          ],
+          "differences": "Form POST to SePay gateway instead of QR code display"
+        }
+      },
+
+      "migrationStrategy": {
+        "approach": "Gradual migration with backward compatibility",
+        "phases": [
+          {
+            "phase": 1,
+            "name": "Preparation",
+            "tasks": [
+              "Install sepay-pg-node package",
+              "Add new environment variables",
+              "Create SDK client wrapper",
+              "Update database schema if needed"
+            ]
+          },
+          {
+            "phase": 2,
+            "name": "Implementation",
+            "tasks": [
+              "Create new checkout form component",
+              "Update order creation action to support both flows",
+              "Implement IPN webhook handler",
+              "Create callback URL handlers (success/error/cancel)",
+              "Update sepay.ts to use SDK methods"
+            ]
+          },
+          {
+            "phase": 3,
+            "name": "Testing",
+            "tasks": [
+              "Test in sandbox environment",
+              "Test all payment methods",
+              "Test IPN webhook",
+              "Test callback URLs",
+              "Verify order status updates"
+            ]
+          },
+          {
+            "phase": 4,
+            "name": "Deployment",
+            "tasks": [
+              "Feature flag for gradual rollout",
+              "Deploy to production",
+              "Monitor transactions",
+              "Deprecate old QR code flow"
+            ]
+          }
+        ]
+      }
+    },
+
+    "filesImpacted": {
+      "modified": [
+        {
+          "path": "src/lib/sepay.ts",
+          "changes": [
+            "Add SePayPgClient initialization",
+            "Replace generateQRUrl with SDK methods",
+            "Update validateWebhookSignature to use IPN format",
+            "Add new methods: initCheckout(), validateIPN()",
+            "Keep utility functions for backward compatibility"
+          ],
+          "breakingChanges": false,
+          "migrationNotes": "Maintain old methods with deprecation warnings during transition"
+        },
+        {
+          "path": "src/app/api/webhooks/sepay/route.ts",
+          "changes": [
+            "Update to handle new IPN payload structure",
+            "Change from custom payload to official IPN format",
+            "Update transaction processing logic",
+            "Add notification_type handling (ORDER_PAID, ORDER_FAILED, etc.)",
+            "Update order status mapping"
+          ],
+          "breakingChanges": false,
+          "migrationNotes": "Support both old and new webhook formats during transition"
+        },
+        {
+          "path": "src/app/actions/create-order.ts",
+          "changes": [
+            "Add payment method selection parameter",
+            "Generate checkout form fields instead of QR URL",
+            "Return checkout URL and form fields",
+            "Add support for custom_data",
+            "Add callback URL configuration"
+          ],
+          "breakingChanges": true,
+          "migrationNotes": "Return type changes from {qrUrl} to {checkoutUrl, formFields}"
+        },
+        {
+          "path": "package.json",
+          "changes": ["Add dependency: sepay-pg-node"],
+          "breakingChanges": false
+        },
+        {
+          "path": ".env.example",
+          "changes": [
+            "Add SEPAY_MERCHANT_ID",
+            "Add SEPAY_SECRET_KEY",
+            "Add SEPAY_ENV (sandbox/production)",
+            "Deprecate old variables (SEPAY_ACCOUNT_NUMBER, SEPAY_ACCOUNT_NAME, SEPAY_BANK_CODE)",
+            "Update SEPAY_WEBHOOK_SECRET description for IPN"
+          ],
+          "breakingChanges": false
+        },
+        {
+          "path": "prisma/schema.prisma",
+          "changes": [
+            "Add invoiceNumber field to Order model (unique)",
+            "Add paymentMethod field to Order model",
+            "Update Transaction.gatewayData to support new IPN format",
+            "Add sepayOrderId field to Transaction model"
+          ],
+          "breakingChanges": false,
+          "migrationNotes": "Requires database migration"
+        }
+      ],
+
+      "deprecated": [
+        {
+          "path": "src/components/PaymentQRCode.tsx",
+          "reason": "Replaced by checkout form redirection flow",
+          "migrationPath": "Use new CheckoutForm component",
+          "timeline": "Keep for 2 releases, then remove"
+        }
+      ]
+    },
+
+    "newFiles": [
+      {
+        "path": "src/lib/sepay-client.ts",
+        "purpose": "SDK client initialization and configuration",
+        "exports": [
+          "getSepayClient() - Returns configured SePayPgClient instance",
+          "SEPAY_CONFIG - Configuration constants"
+        ],
+        "dependencies": ["sepay-pg-node"],
+        "example": "import { getSepayClient } from '@/lib/sepay-client'"
+      },
+      {
+        "path": "src/components/checkout/CheckoutForm.tsx",
+        "purpose": "Client component for checkout form with payment method selection",
+        "props": {
+          "orderId": "string - Order ID",
+          "invoiceNumber": "string - Unique invoice number",
+          "amount": "number - Payment amount",
+          "description": "string - Order description",
+          "paymentMethods": "array - Available payment methods",
+          "onSubmit": "function - Form submission handler"
+        },
+        "features": [
+          "Payment method selection (BANK_TRANSFER, CARD, NAPAS_BANK_TRANSFER)",
+          "Auto-submit form to SePay gateway",
+          "Loading states",
+          "Error handling"
+        ],
+        "type": "client"
+      },
+      {
+        "path": "src/app/payment/success/page.tsx",
+        "purpose": "Success callback page after successful payment",
+        "features": [
+          "Display success message",
+          "Show order details",
+          "Link to order tracking",
+          "Auto-redirect to dashboard after 5 seconds"
+        ],
+        "route": "/payment/success"
+      },
+      {
+        "path": "src/app/payment/error/page.tsx",
+        "purpose": "Error callback page after failed payment",
+        "features": [
+          "Display error message",
+          "Show retry options",
+          "Link to support",
+          "Order details"
+        ],
+        "route": "/payment/error"
+      },
+      {
+        "path": "src/app/payment/cancel/page.tsx",
+        "purpose": "Cancel callback page when user cancels payment",
+        "features": [
+          "Display cancellation message",
+          "Retry payment option",
+          "Link back to order"
+        ],
+        "route": "/payment/cancel"
+      },
+      {
+        "path": "src/app/api/payment/ipn/route.ts",
+        "purpose": "IPN (Instant Payment Notification) webhook endpoint",
+        "method": "POST",
+        "route": "/api/payment/ipn",
+        "features": [
+          "Receive IPN from SePay",
+          "Validate signature",
+          "Process notification_type (ORDER_PAID, ORDER_FAILED)",
+          "Update order status",
+          "Create transaction record",
+          "Idempotency handling",
+          "Return 200 OK acknowledgment"
+        ],
+        "security": [
+          "Signature validation",
+          "IP whitelist",
+          "Idempotency checks"
+        ]
+      },
+      {
+        "path": "src/app/actions/checkout-actions.ts",
+        "purpose": "Server actions for checkout flow",
+        "exports": [
+          "initCheckout(orderId, paymentMethod) - Initialize checkout session",
+          "generateInvoiceNumber() - Generate unique invoice number",
+          "getCheckoutFormFields(orderId, paymentMethod) - Get form fields for checkout"
+        ],
+        "type": "server"
+      },
+      {
+        "path": "src/types/sepay.ts",
+        "purpose": "TypeScript type definitions for SePay integration",
+        "exports": [
+          "PaymentMethod - Union type for payment methods",
+          "IPNPayload - IPN webhook payload structure",
+          "CheckoutFormFields - Checkout form fields",
+          "OrderNotification - Order notification data",
+          "TransactionNotification - Transaction notification data"
+        ]
+      },
+      {
+        "path": "prisma/migrations/YYYYMMDDHHMMSS_add_sepay_sdk_fields/migration.sql",
+        "purpose": "Database migration for SDK support",
+        "changes": [
+          "ALTER TABLE orders ADD COLUMN invoice_number VARCHAR(255) UNIQUE",
+          "ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50)",
+          "ALTER TABLE transactions ADD COLUMN sepay_order_id VARCHAR(255)",
+          "CREATE INDEX idx_orders_invoice_number ON orders(invoice_number)",
+          "CREATE INDEX idx_transactions_sepay_order_id ON transactions(sepay_order_id)"
+        ]
+      },
+      {
+        "path": "src/utils/invoice-generator.ts",
+        "purpose": "Generate unique invoice numbers",
+        "exports": [
+          "generateInvoiceNumber() - Generates format INV-{timestamp}-{random}"
+        ],
+        "example": "INV-1732345678-ABC123"
+      }
+    ],
+
+    "envChanges": {
+      "new": [
+        {
+          "name": "SEPAY_MERCHANT_ID",
+          "description": "Merchant ID from SePay dashboard",
+          "required": true,
+          "example": "YOUR_MERCHANT_ID",
+          "source": "https://my.sepay.vn/pg/payment-methods (Thông tin tích hợp)"
+        },
+        {
+          "name": "SEPAY_SECRET_KEY",
+          "description": "Secret key for signature generation",
+          "required": true,
+          "example": "YOUR_MERCHANT_SECRET_KEY",
+          "source": "https://my.sepay.vn/pg/payment-methods (Thông tin tích hợp)",
+          "security": "Keep this secret! Never commit to version control"
+        },
+        {
+          "name": "SEPAY_ENV",
+          "description": "Environment: sandbox or production",
+          "required": true,
+          "example": "sandbox",
+          "values": ["sandbox", "production"],
+          "default": "sandbox"
+        },
+        {
+          "name": "SEPAY_IPN_URL",
+          "description": "Full URL for IPN webhook endpoint",
+          "required": true,
+          "example": "https://yourdomain.com/api/payment/ipn",
+          "notes": "Must be publicly accessible, configure in SePay dashboard"
+        },
+        {
+          "name": "NEXT_PUBLIC_SUCCESS_URL",
+          "description": "Success redirect URL",
+          "required": false,
+          "example": "https://yourdomain.com/payment/success",
+          "default": "/payment/success"
+        },
+        {
+          "name": "NEXT_PUBLIC_ERROR_URL",
+          "description": "Error redirect URL",
+          "required": false,
+          "example": "https://yourdomain.com/payment/error",
+          "default": "/payment/error"
+        },
+        {
+          "name": "NEXT_PUBLIC_CANCEL_URL",
+          "description": "Cancel redirect URL",
+          "required": false,
+          "example": "https://yourdomain.com/payment/cancel",
+          "default": "/payment/cancel"
+        }
+      ],
+
+      "deprecated": [
+        {
+          "name": "SEPAY_ACCOUNT_NUMBER",
+          "reason": "SDK handles account configuration automatically",
+          "migrationPath": "Use SEPAY_MERCHANT_ID instead",
+          "removeAfter": "v2.0.0"
+        },
+        {
+          "name": "SEPAY_ACCOUNT_NAME",
+          "reason": "SDK handles account configuration automatically",
+          "migrationPath": "Use SEPAY_MERCHANT_ID instead",
+          "removeAfter": "v2.0.0"
+        },
+        {
+          "name": "SEPAY_BANK_CODE",
+          "reason": "SDK handles bank configuration automatically",
+          "migrationPath": "Use SEPAY_MERCHANT_ID instead",
+          "removeAfter": "v2.0.0"
+        }
+      ],
+
+      "updated": [
+        {
+          "name": "SEPAY_WEBHOOK_SECRET",
+          "oldPurpose": "Custom webhook signature validation",
+          "newPurpose": "IPN signature validation with SDK",
+          "notes": "Same secret key, but validation logic changes to use SDK methods"
+        },
+        {
+          "name": "SEPAY_ALLOWED_IPS",
+          "oldPurpose": "IP whitelist for webhooks",
+          "newPurpose": "IP whitelist for IPN endpoint",
+          "notes": "Same configuration, applies to new IPN endpoint"
+        }
+      ]
+    },
+
+    "integrationSteps": {
+      "step1_preparation": {
+        "title": "Install SDK and Configure Environment",
+        "tasks": [
+          {
+            "task": "Install sepay-pg-node package",
+            "command": "npm install sepay-pg-node",
+            "verification": "Check package.json for sepay-pg-node dependency"
+          },
+          {
+            "task": "Register for SePay sandbox account",
+            "url": "https://my.sepay.vn/register",
+            "steps": [
+              "Create account",
+              "Navigate to Cổng thanh toán > Đăng ký",
+              "Select 'Quét mã QR chuyển khoản ngân hàng' > Bắt đầu ngay",
+              "Choose Sandbox mode",
+              "Copy MERCHANT_ID and SECRET_KEY"
+            ]
+          },
+          {
+            "task": "Update environment variables",
+            "files": [".env", ".env.example"],
+            "variables": [
+              "SEPAY_MERCHANT_ID=<from_dashboard>",
+              "SEPAY_SECRET_KEY=<from_dashboard>",
+              "SEPAY_ENV=sandbox",
+              "SEPAY_IPN_URL=http://localhost:3000/api/payment/ipn (for dev)"
+            ]
+          },
+          {
+            "task": "Configure IPN URL in SePay dashboard",
+            "url": "https://my.sepay.vn/pg/payment-methods",
+            "ipnUrl": "https://<your-domain>/api/payment/ipn",
+            "notes": "For local dev, use ngrok or similar tunnel service"
+          }
+        ]
+      },
+
+      "step2_database": {
+        "title": "Update Database Schema",
+        "tasks": [
+          {
+            "task": "Create Prisma migration",
+            "files": ["prisma/schema.prisma"],
+            "changes": [
+              "Add invoiceNumber to Order model",
+              "Add paymentMethod to Order model",
+              "Add sepayOrderId to Transaction model"
+            ]
+          },
+          {
+            "task": "Run migration",
+            "commands": [
+              "npx prisma migrate dev --name add_sepay_sdk_fields",
+              "npx prisma generate"
+            ]
+          }
+        ]
+      },
+
+      "step3_sdk_client": {
+        "title": "Create SDK Client Wrapper",
+        "tasks": [
+          {
+            "task": "Create sepay-client.ts",
+            "file": "src/lib/sepay-client.ts",
+            "responsibilities": [
+              "Initialize SePayPgClient with config",
+              "Export singleton instance",
+              "Handle environment-specific configuration"
+            ]
+          },
+          {
+            "task": "Create TypeScript types",
+            "file": "src/types/sepay.ts",
+            "types": ["PaymentMethod", "IPNPayload", "CheckoutFormFields"]
+          }
+        ]
+      },
+
+      "step4_backend": {
+        "title": "Implement Backend Logic",
+        "tasks": [
+          {
+            "task": "Create IPN webhook handler",
+            "file": "src/app/api/payment/ipn/route.ts",
+            "flow": [
+              "Receive POST request from SePay",
+              "Validate signature",
+              "Check notification_type",
+              "Extract order and transaction data",
+              "Update order status",
+              "Create transaction record",
+              "Return 200 OK"
+            ]
+          },
+          {
+            "task": "Create checkout actions",
+            "file": "src/app/actions/checkout-actions.ts",
+            "methods": [
+              "initCheckout() - Prepare checkout session",
+              "getCheckoutFormFields() - Generate signed form fields using SDK"
+            ]
+          },
+          {
+            "task": "Update create-order.ts",
+            "file": "src/app/actions/create-order.ts",
+            "changes": [
+              "Generate invoice number",
+              "Add payment method parameter",
+              "Return checkout form fields instead of QR URL",
+              "Store invoice number in database"
+            ]
+          },
+          {
+            "task": "Update sepay.ts utilities",
+            "file": "src/lib/sepay.ts",
+            "changes": [
+              "Add SDK-based methods",
+              "Keep old methods for backward compatibility",
+              "Add deprecation warnings"
+            ]
+          }
+        ]
+      },
+
+      "step5_frontend": {
+        "title": "Create Frontend Components",
+        "tasks": [
+          {
+            "task": "Create CheckoutForm component",
+            "file": "src/components/checkout/CheckoutForm.tsx",
+            "features": [
+              "Payment method selection",
+              "Hidden form fields for checkout data",
+              "Auto-submit to SePay gateway",
+              "Loading state"
+            ]
+          },
+          {
+            "task": "Create callback pages",
+            "files": [
+              "src/app/payment/success/page.tsx",
+              "src/app/payment/error/page.tsx",
+              "src/app/payment/cancel/page.tsx"
+            ],
+            "purpose": "Handle redirects from SePay after payment"
+          },
+          {
+            "task": "Update order creation flow",
+            "changes": [
+              "Replace PaymentQRCode with CheckoutForm",
+              "Handle form submission",
+              "Redirect to SePay gateway"
+            ]
+          }
+        ]
+      },
+
+      "step6_compatibility": {
+        "title": "Backward Compatibility",
+        "tasks": [
+          {
+            "task": "Feature flag implementation",
+            "file": "src/lib/feature-flags.ts",
+            "flag": "USE_SEPAY_SDK",
+            "default": false,
+            "notes": "Gradual rollout support"
+          },
+          {
+            "task": "Dual webhook support",
+            "notes": "Support both old webhook and new IPN during transition",
+            "duration": "2 releases"
+          },
+          {
+            "task": "Keep PaymentQRCode component",
+            "status": "deprecated",
+            "removeAfter": "v2.0.0"
+          }
+        ]
+      }
+    },
+
+    "testingPlan": {
+      "phase1_unit_tests": {
+        "description": "Unit tests for individual components",
+        "tests": [
+          {
+            "file": "src/lib/__tests__/sepay-client.test.ts",
+            "cases": [
+              "SDK client initialization with correct config",
+              "Environment switching (sandbox/production)",
+              "Error handling for missing credentials"
+            ]
+          },
+          {
+            "file": "src/utils/__tests__/invoice-generator.test.ts",
+            "cases": [
+              "Generate unique invoice numbers",
+              "Format validation",
+              "No duplicates in batch generation"
+            ]
+          },
+          {
+            "file": "src/app/actions/__tests__/checkout-actions.test.ts",
+            "cases": [
+              "Generate checkout form fields",
+              "Signature generation",
+              "Validation of required fields"
+            ]
+          }
+        ]
+      },
+
+      "phase2_integration_tests": {
+        "description": "Integration tests for payment flow",
+        "tests": [
+          {
+            "name": "Complete checkout flow",
+            "steps": [
+              "Create order",
+              "Generate checkout form",
+              "Submit to SePay (sandbox)",
+              "Simulate payment",
+              "Verify IPN callback",
+              "Check order status update"
+            ]
+          },
+          {
+            "name": "IPN webhook processing",
+            "cases": [
+              "Valid IPN with ORDER_PAID notification",
+              "Invalid signature rejection",
+              "Duplicate IPN handling (idempotency)",
+              "Unknown order handling"
+            ]
+          },
+          {
+            "name": "Callback URL handling",
+            "cases": [
+              "Success URL redirect",
+              "Error URL redirect",
+              "Cancel URL redirect"
+            ]
+          }
+        ]
+      },
+
+      "phase3_sandbox_testing": {
+        "description": "Manual testing in SePay sandbox",
+        "environment": {
+          "mode": "sandbox",
+          "url": "https://sandbox-pay.sepay.vn",
+          "ipn": "Use ngrok for local IPN testing"
+        },
+        "scenarios": [
+          {
+            "scenario": "BANK_TRANSFER payment",
+            "steps": [
+              "Create order with BANK_TRANSFER method",
+              "Submit checkout form",
+              "Redirected to SePay sandbox",
+              "Complete mock payment",
+              "Verify success callback",
+              "Verify IPN received",
+              "Check order status = PAID"
+            ]
+          },
+          {
+            "scenario": "CARD payment (if enabled)",
+            "steps": [
+              "Create order with CARD method",
+              "Enter test card details",
+              "Complete payment",
+              "Verify callbacks and IPN"
+            ]
+          },
+          {
+            "scenario": "Payment cancellation",
+            "steps": [
+              "Start checkout",
+              "Click cancel on SePay page",
+              "Verify cancel callback",
+              "Order status remains PENDING"
+            ]
+          },
+          {
+            "scenario": "Payment error",
+            "steps": [
+              "Simulate payment failure",
+              "Verify error callback",
+              "Check error handling"
+            ]
+          }
+        ],
+        "verification": [
+          "Order status updates correctly",
+          "Transaction records created",
+          "IPN data stored in gatewayData",
+          "No duplicate transactions",
+          "Proper error messages",
+          "UI shows correct status"
+        ]
+      },
+
+      "phase4_load_testing": {
+        "description": "Performance and concurrency testing",
+        "tests": [
+          {
+            "name": "Concurrent IPN handling",
+            "scenario": "Multiple IPN requests for same order",
+            "expected": "Only one transaction created (idempotency)"
+          },
+          {
+            "name": "High volume orders",
+            "scenario": "100+ orders created simultaneously",
+            "expected": "All orders processed correctly, unique invoice numbers"
+          }
+        ]
+      },
+
+      "phase5_security_testing": {
+        "description": "Security validation",
+        "tests": [
+          {
+            "name": "IPN signature validation",
+            "cases": [
+              "Valid signature accepted",
+              "Invalid signature rejected",
+              "Missing signature rejected"
+            ]
+          },
+          {
+            "name": "IP whitelist",
+            "cases": [
+              "Allowed IP accepted",
+              "Blocked IP rejected",
+              "Missing IP handling"
+            ]
+          },
+          {
+            "name": "Data validation",
+            "cases": [
+              "Invalid amount rejected",
+              "Missing required fields rejected",
+              "SQL injection attempts blocked"
+            ]
+          }
+        ]
+      }
+    },
+
+    "risks": {
+      "technical": [
+        {
+          "risk": "Breaking changes to existing payment flow",
+          "impact": "HIGH",
+          "probability": "MEDIUM",
+          "mitigation": [
+            "Feature flag for gradual rollout",
+            "Support both old and new flows during transition",
+            "Comprehensive testing in sandbox",
+            "Rollback plan ready"
+          ]
+        },
+        {
+          "risk": "IPN endpoint not publicly accessible in development",
+          "impact": "MEDIUM",
+          "probability": "HIGH",
+          "mitigation": [
+            "Use ngrok or similar tunnel service for local dev",
+            "Document setup process clearly",
+            "Provide mock IPN test script"
+          ]
+        },
+        {
+          "risk": "Invoice number collision",
+          "impact": "HIGH",
+          "probability": "LOW",
+          "mitigation": [
+            "Use UUID or timestamp-based generation",
+            "Add unique database constraint",
+            "Add retry logic on collision"
+          ]
+        },
+        {
+          "risk": "SDK version compatibility issues",
+          "impact": "MEDIUM",
+          "probability": "LOW",
+          "mitigation": [
+            "Pin SDK version in package.json",
+            "Monitor SDK updates and changelogs",
+            "Test before upgrading SDK"
+          ]
+        },
+        {
+          "risk": "Environment variable mismatch between sandbox and production",
+          "impact": "HIGH",
+          "probability": "MEDIUM",
+          "mitigation": [
+            "Clear documentation",
+            "Environment-specific .env files",
+            "Validation on startup",
+            "Separate credentials for sandbox/production"
+          ]
+        }
+      ],
+
+      "business": [
+        {
+          "risk": "User confusion with new payment flow",
+          "impact": "MEDIUM",
+          "probability": "MEDIUM",
+          "mitigation": [
+            "Clear UI instructions",
+            "User education/announcement",
+            "Support documentation",
+            "Gradual rollout"
+          ]
+        },
+        {
+          "risk": "Payment failures during migration",
+          "impact": "HIGH",
+          "probability": "LOW",
+          "mitigation": [
+            "Test thoroughly in sandbox",
+            "Migrate during low-traffic period",
+            "Have rollback plan",
+            "Monitor transactions closely"
+          ]
+        },
+        {
+          "risk": "Lost revenue during downtime",
+          "impact": "HIGH",
+          "probability": "LOW",
+          "mitigation": [
+            "Zero-downtime deployment",
+            "Quick rollback capability",
+            "24/7 monitoring during migration"
+          ]
+        }
+      ],
+
+      "operational": [
+        {
+          "risk": "IPN endpoint reliability",
+          "impact": "HIGH",
+          "probability": "MEDIUM",
+          "mitigation": [
+            "Implement retry mechanism",
+            "Log all IPN requests",
+            "Manual reconciliation process",
+            "Alerts for failed IPNs"
+          ]
+        },
+        {
+          "risk": "Callback URL failures",
+          "impact": "MEDIUM",
+          "probability": "LOW",
+          "mitigation": [
+            "Fallback error pages",
+            "User notifications",
+            "Support contact info"
+          ]
+        }
+      ]
+    },
+
+    "estimatedEffort": {
+      "totalHours": "40-56 hours",
+      "breakdown": {
+        "planning": {
+          "hours": "4-6",
+          "tasks": [
+            "Review SDK documentation",
+            "Design integration architecture",
+            "Create migration plan",
+            "Risk assessment"
+          ]
+        },
+        "backend_development": {
+          "hours": "12-16",
+          "tasks": [
+            "SDK client setup (2h)",
+            "IPN webhook handler (4h)",
+            "Checkout actions (3h)",
+            "Database migration (2h)",
+            "Update existing utilities (2h)",
+            "Testing and debugging (3h)"
+          ]
+        },
+        "frontend_development": {
+          "hours": "8-10",
+          "tasks": [
+            "CheckoutForm component (4h)",
+            "Callback pages (2h)",
+            "Update order flow (2h)",
+            "Testing (2h)"
+          ]
+        },
+        "testing": {
+          "hours": "10-14",
+          "tasks": [
+            "Unit tests (4h)",
+            "Integration tests (4h)",
+            "Sandbox manual testing (4h)",
+            "Security testing (2h)"
+          ]
+        },
+        "deployment": {
+          "hours": "4-6",
+          "tasks": [
+            "Environment setup (2h)",
+            "Production deployment (2h)",
+            "Monitoring setup (1h)",
+            "Documentation (1h)"
+          ]
+        },
+        "buffer": {
+          "hours": "2-4",
+          "reason": "Unexpected issues and adjustments"
+        }
+      },
+      "timeline": {
+        "week1": "Planning + Backend development",
+        "week2": "Frontend development + Testing",
+        "week3": "Sandbox testing + Bug fixes + Deployment prep",
+        "week4": "Production deployment + Monitoring"
+      },
+      "team": {
+        "developers": "1-2 developers",
+        "skills": [
+          "Next.js/React",
+          "TypeScript",
+          "Prisma/PostgreSQL",
+          "Payment gateway integration",
+          "Webhook handling"
+        ]
+      }
+    },
+
+    "rolloutPlan": {
+      "phase1": {
+        "name": "Development",
+        "duration": "2 weeks",
+        "environment": "local + sandbox",
+        "tasks": [
+          "Complete all development",
+          "Unit and integration tests",
+          "Sandbox testing",
+          "Code review"
+        ]
+      },
+      "phase2": {
+        "name": "Staging",
+        "duration": "1 week",
+        "environment": "staging + sandbox",
+        "tasks": [
+          "Deploy to staging",
+          "Full E2E testing",
+          "Performance testing",
+          "Security audit"
+        ]
+      },
+      "phase3": {
+        "name": "Production Soft Launch",
+        "duration": "1 week",
+        "environment": "production",
+        "strategy": "Feature flag at 10% traffic",
+        "tasks": [
+          "Deploy to production with flag disabled",
+          "Enable for 10% of users",
+          "Monitor closely",
+          "Collect feedback"
+        ]
+      },
+      "phase4": {
+        "name": "Full Rollout",
+        "duration": "1 week",
+        "environment": "production",
+        "strategy": "Gradually increase to 100%",
+        "tasks": [
+          "Increase to 50% traffic",
+          "Monitor for issues",
+          "Increase to 100% traffic",
+          "Deprecate old flow"
+        ]
+      },
+      "phase5": {
+        "name": "Cleanup",
+        "duration": "1 week",
+        "tasks": [
+          "Remove old QR code flow",
+          "Remove feature flags",
+          "Update documentation",
+          "Remove deprecated code"
+        ]
+      }
+    },
+
+    "documentation": {
+      "required": [
+        {
+          "file": "docs/SEPAY_SDK_INTEGRATION.md",
+          "content": [
+            "Overview of new integration",
+            "Architecture diagram",
+            "Environment setup guide",
+            "Development workflow",
+            "Testing guide",
+            "Troubleshooting"
+          ]
+        },
+        {
+          "file": "docs/PAYMENT_FLOW.md",
+          "content": [
+            "Payment flow diagram",
+            "Sequence diagrams",
+            "State transitions",
+            "Error handling"
+          ]
+        },
+        {
+          "file": "README.md",
+          "updates": [
+            "Update payment integration section",
+            "Add SePay SDK setup instructions",
+            "Update environment variables list"
+          ]
+        },
+        {
+          "file": "CHANGELOG.md",
+          "entry": [
+            "## [2.0.0] - Migration to SePay Official SDK",
+            "### Added",
+            "- Official SePay SDK integration",
+            "- Multiple payment methods support",
+            "- IPN webhook handling",
+            "### Changed",
+            "- Payment flow from QR code to checkout form",
+            "### Deprecated",
+            "- Custom QR code generation",
+            "- Old webhook handler"
+          ]
+        }
+      ]
+    },
+
+    "monitoringAndAlerts": {
+      "metrics": [
+        {
+          "name": "Payment success rate",
+          "threshold": "> 95%",
+          "alert": "< 90%"
+        },
+        {
+          "name": "IPN processing time",
+          "threshold": "< 1s",
+          "alert": "> 3s"
+        },
+        {
+          "name": "Failed IPN requests",
+          "threshold": "< 1%",
+          "alert": "> 5%"
+        },
+        {
+          "name": "Checkout form load time",
+          "threshold": "< 2s",
+          "alert": "> 5s"
+        }
+      ],
+      "logging": [
+        "All IPN requests (payload + response)",
+        "Checkout form generations",
+        "Payment method selections",
+        "Order status transitions",
+        "Error occurrences"
+      ],
+      "dashboards": [
+        "Payment volume by method",
+        "Success/failure rates",
+        "IPN processing times",
+        "Error rates and types"
+      ]
+    },
+
+    "successCriteria": {
+      "functional": [
+        "Users can complete payments using all supported methods",
+        "IPN webhook processes notifications correctly",
+        "Order status updates automatically after payment",
+        "Callback URLs redirect properly",
+        "No duplicate transactions created"
+      ],
+      "performance": [
+        "Checkout form loads in < 2 seconds",
+        "IPN processing completes in < 1 second",
+        "Database queries optimized (< 100ms)",
+        "No payment processing delays"
+      ],
+      "security": [
+        "IPN signature validation works correctly",
+        "IP whitelist enforced",
+        "No sensitive data exposed in logs",
+        "HTTPS enforced for all endpoints"
+      ],
+      "business": [
+        "Payment success rate > 95%",
+        "Zero revenue loss during migration",
+        "User satisfaction maintained",
+        "Support ticket volume stable"
+      ]
+    }
+  }
+}

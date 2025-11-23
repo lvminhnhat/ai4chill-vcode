@@ -1,0 +1,21 @@
+{
+  "path": "src/components/FulfillmentFlow.tsx",
+  "type": "component",
+  "lastModified": "2025-11-23T11:55:00Z",
+  "dependencies": ["react", "@/services/fulfillment-service", "@/lib/email"],
+  "props": {
+    "orderId": "string"
+  },
+  "patterns": {
+    "workflow": "Stepper UI for manual fulfillment: validate order, select items, confirm shipment, send email",
+    "email": "Uses Resend service via server action to send fulfillment emails with tracking"
+  },
+  "relatedFiles": [
+    "scripts/test-fulfillment-flow.ts",
+    "src/services/fulfillment.ts"
+  ],
+  "notes": [
+    "Tracks audit events in DB (who fulfilled, timestamp)",
+    "Supports attaching tracking numbers and marking items as fulfilled"
+  ]
+}

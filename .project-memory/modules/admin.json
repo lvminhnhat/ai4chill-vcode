@@ -1,0 +1,42 @@
+{
+  "name": "admin",
+  "responsibilities": [
+    "Admin RBAC and role-based access control",
+    "Admin UI (layout, sidebar, inventory & product management)",
+    "Server Actions for admin CRUD operations",
+    "Middleware protection for /admin routes"
+  ],
+  "patterns": {
+    "auth": "NextAuth.js v5 - extend session to include roles, requireAdmin() helper",
+    "routeProtection": "middleware.ts guards for /admin and requireAdmin() server-side checks",
+    "ui": "AdminLayout with sidebar navigation; share components under src/components/admin/",
+    "dataFetching": "Server Actions for create/update/delete, Prisma client on server"
+  },
+  "apiEndpoints": [
+    {
+      "path": "/api/admin/products",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "notes": "Product management CRUD (protected)"
+    },
+    {
+      "path": "/api/admin/variants",
+      "methods": ["GET", "POST", "PUT", "DELETE"],
+      "notes": "Variant CRUD (protected)"
+    },
+    {
+      "path": "/api/admin/inventory",
+      "methods": ["GET", "POST", "PUT"],
+      "notes": "Inventory management endpoints (encrypted credentials)"
+    }
+  ],
+  "helpers": [
+    "requireAdmin() - server helper to assert admin role",
+    "extend NextAuth session to include roles and permissions"
+  ],
+  "notes": [
+    "Admin role added to NextAuth session on sign-in",
+    "middleware.ts updated to protect /admin routes",
+    "Admin layout created at src/app/(admin)/ with sidebar navigation",
+    "Uses Server Actions for admin CRUD to keep logic on server and simplify access control"
+  ]
+}
