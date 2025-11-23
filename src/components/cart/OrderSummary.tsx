@@ -52,15 +52,17 @@ export function OrderSummary({ variant = 'sidebar' }: OrderSummaryProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button
-          className="w-full"
-          onClick={() => router.push('/checkout')}
-          disabled={getItemCount() === 0}
-        >
-          Proceed to Checkout
-        </Button>
-      </CardFooter>
+      {variant === 'sidebar' && (
+        <CardFooter>
+          <Button
+            className="w-full"
+            onClick={() => router.push('/checkout')}
+            disabled={getItemCount() === 0}
+          >
+            Proceed to Checkout
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   )
 }

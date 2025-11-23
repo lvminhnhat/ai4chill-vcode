@@ -86,8 +86,6 @@ export function ProductFilters({ className }: ProductFiltersProps) {
 
   const hasActiveFilters =
     currentCategory.length > 0 || currentSort !== 'newest'
-
-  const FiltersContent = () => (
     <div className="space-y-6">
       {/* Categories */}
       <div>

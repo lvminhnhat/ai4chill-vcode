@@ -97,7 +97,9 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
             ))}
           </div>
           <span className="text-sm text-gray-600">
-            {product.rating} ({Math.floor(Math.random() * 100) + 20} reviews)
+            {product.rating} (
+            {(Math.floor(product.id.charCodeAt(0) * 7 + 23) % 100) + 20}{' '}
+            reviews)
           </span>
         </div>
       </div>
