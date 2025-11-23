@@ -72,12 +72,14 @@ model Variant {
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  userId    String
-  total     Decimal     @db.Decimal(10, 2)
-  status    OrderStatus @default(PENDING)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id            String      @id @default(cuid())
+  userId        String
+  total         Decimal     @db.Decimal(10, 2)
+  status        OrderStatus @default(PENDING)
+  invoiceNumber String      @unique
+  paymentMethod String?     // BANK_TRANSFER, CARD, NAPAS_BANK_TRANSFER
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   // Relations
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -85,6 +87,7 @@ model Order {
   transactions Transaction[]
 
   @@index([userId])
+  @@index([invoiceNumber])
   @@map("orders")
 }
 
@@ -124,20 +127,23 @@ model Account {
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  amount      Decimal  @db.Decimal(10, 2)
-  status      String   // SUCCESS, FAILED, PENDING
-  provider    String   // SEPAY
-  gatewayData Json?    // Raw webhook payload
-  reference   String?  // Unique transaction reference for idempotency
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  orderId      String
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount       Decimal  @db.Decimal(10, 2)
+  status       String   // SUCCESS, FAILED, PENDING
+  provider     String   // SEPAY
+  sepayOrderId String?  // SePay's internal order ID
+  paymentMethod String? // to match Order.paymentMethod
+  gatewayData  Json?    // Raw webhook payload
+  reference    String?  // Unique transaction reference for idempotency
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   
   @@index([orderId])
   @@index([reference])
   @@index([provider])
+  @@index([sepayOrderId])
   @@map("transactions")
 }
 
