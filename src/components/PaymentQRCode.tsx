@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, QrCode, CheckCircle, Clock } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 interface PaymentQRCodeProps {
   orderId: string
@@ -52,7 +53,14 @@ export function PaymentQRCode({
           setCheckingCount(prev => prev + 1)
         }
       } catch (error) {
-        console.error('Error checking payment status:', error)
+        if (error instanceof Error) {
+          logger.paymentError(error, orderId, {
+            checkingCount,
+            amount,
+          })
+        } else {
+          logger.error('Unknown payment status check error', { orderId, error })
+        }
         setPaymentStatus('pending')
       }
     }

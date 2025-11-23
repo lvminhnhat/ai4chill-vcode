@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
 import { signIn } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -87,8 +88,36 @@ function LoginPageContent() {
         router.refresh()
       }
     } catch (error) {
-      console.error('Login error:', error)
-      setServerError('Không thể kết nối đến máy chủ. Vui lòng thử lại.')
+      if (error instanceof Error) {
+        if (
+          error.message.includes('credential') ||
+          error.message.includes('password')
+        ) {
+          setServerError('Email hoặc mật khẩu không chính xác.')
+        } else if (
+          error.message.includes('network') ||
+          error.message.includes('fetch')
+        ) {
+          setServerError('Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.')
+        } else if (
+          error.message.includes('rate') ||
+          error.message.includes('limit')
+        ) {
+          setServerError(
+            'Quá nhiều lần thử. Vui lòng đợi vài phút rồi thử lại.'
+          )
+        } else {
+          setServerError('Đăng nhập thất bại. Vui lòng thử lại sau.')
+        }
+        logger.error('Login failed', {
+          errorMessage: error.message,
+          email: data.email,
+          stack: error.stack,
+        })
+      } else {
+        setServerError('Đã xảy ra lỗi không xác định. Vui lòng liên hệ hỗ trợ.')
+        logger.error('Unknown login error', { error, email: data.email })
+      }
     } finally {
       setIsLoading(false)
     }

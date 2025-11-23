@@ -78,6 +78,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       name: 'Standard',
       price: product.price,
       stock: product.stock,
+      duration: '1 Month',
+      productId: product.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ]
 

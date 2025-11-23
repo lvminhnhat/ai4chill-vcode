@@ -81,7 +81,8 @@ async function testFulfillmentFlow() {
 
     if (result.success) {
       console.log('✅ Fulfillment successful!')
-      console.log(`📧 Message: ${result.message}`)
+      console.log(`📦 Order ID: ${result.order?.id}`)
+      console.log(`📧 Status: ${result.order?.status}`)
 
       // Check order status after fulfillment
       const updatedOrder = await prisma.order.findUnique({
@@ -106,11 +107,7 @@ async function testFulfillmentFlow() {
       }
     } else {
       console.log('❌ Fulfillment failed!')
-      console.log(`📧 Error: ${result.message}`)
-
-      if (result.error) {
-        console.log(`🔍 Details: ${result.error}`)
-      }
+      console.log(`🔍 Details: ${result.error}`)
     }
   } catch (error) {
     console.error('💥 Test failed with error:', error)

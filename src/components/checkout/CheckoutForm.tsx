@@ -7,7 +7,8 @@ import { createOrder } from '@/app/actions/order-actions'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { z } from 'zod'
+import { z, ZodError } from 'zod'
+import { logger } from '@/lib/logger'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -62,8 +63,42 @@ export function CheckoutForm() {
         toast.error(result.error || 'Có lỗi xảy ra. Vui lòng thử lại.')
       }
     } catch (error) {
-      console.error('Checkout error:', error)
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại.')
+      // Handle specific error types
+      if (error instanceof ZodError) {
+        toast.error('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại form.')
+        // Log validation errors using proper logger
+        logger.validationError(error.issues, 'CheckoutForm')
+      } else if (error instanceof Error) {
+        if (
+          error.message.includes('stock') ||
+          error.message.includes('hết hàng')
+        ) {
+          toast.error('Sản phẩm đã hết hàng. Vui lòng chọn sản phẩm khác.')
+        } else if (
+          error.message.includes('inventory') ||
+          error.message.includes('tồn kho')
+        ) {
+          toast.error(
+            'Sản phẩm không đủ số lượng trong kho. Vui lòng giảm số lượng.'
+          )
+        } else if (
+          error.message.includes('payment') ||
+          error.message.includes('thanh toán')
+        ) {
+          toast.error('Lỗi xử lý thanh toán. Vui lòng thử lại sau.')
+        } else {
+          toast.error('Không thể tạo đơn hàng. Vui lòng thử lại sau.')
+        }
+        // Log error using proper logger
+        logger.checkoutError(error, {
+          userEmail: data.email,
+          userName: data.name,
+          itemsCount: items.length,
+        })
+      } else {
+        toast.error('Đã xảy ra lỗi không xác định. Vui lòng liên hệ hỗ trợ.')
+        logger.error('Unknown checkout error', { error })
+      }
     } finally {
       setIsSubmitting(false)
     }

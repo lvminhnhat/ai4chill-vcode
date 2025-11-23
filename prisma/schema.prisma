@@ -150,6 +150,17 @@ model Transaction {
   @@map("transactions")
 }
 
+model OrderTemp {
+  id        String   @id @default(cuid())
+  email     String
+  items     Json     // Store items as JSON
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  
+  @@index([email])
+  @@map("order_temp")
+}
+
 enum OrderStatus {
   PENDING
   PAID

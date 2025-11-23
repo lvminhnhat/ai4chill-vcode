@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -22,21 +22,24 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1)
   const { addItem } = useCart()
 
-  const selectedVariant = variants.find(v => v.id === selectedVariantId)
+  const selectedVariant = useMemo(
+    () => variants.find(v => v.id === selectedVariantId),
+    [variants, selectedVariantId]
+  )
 
   const handleAddToCart = () => {
     if (!selectedVariant) {
-      toast.error('Please select a plan')
+      toast.error('Vui lòng chọn gói dịch vụ')
       return
     }
 
     if (selectedVariant.stock === 0) {
-      toast.error('This plan is out of stock')
+      toast.error('Gói dịch vụ này đã hết hàng')
       return
     }
 
     if (quantity > selectedVariant.stock) {
-      toast.error(`Only ${selectedVariant.stock} available`)
+      toast.error(`Chỉ còn ${selectedVariant.stock} sản phẩm có sẵn`)
       return
     }
 
@@ -47,25 +50,31 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
         price: selectedVariant.price,
         image: product.image,
         stock: selectedVariant.stock,
+        slug: product.slug || '',
+        rating: product.rating || 0,
       },
       quantity,
       selectedVariant.id,
       selectedVariant.name
     )
 
-    toast.success(`Added ${quantity}x ${product.title} to cart!`)
+    toast.success(`Đã thêm ${quantity}x ${product.title} vào giỏ hàng!`)
   }
 
   const getStockStatus = (stock: number) => {
-    if (stock === 0) return { text: 'Out of Stock', className: 'text-red-600' }
+    if (stock === 0) return { text: 'Hết hàng', className: 'text-red-600' }
     if (stock <= 5)
-      return { text: `Only ${stock} left!`, className: 'text-orange-600' }
-    return { text: 'In Stock', className: 'text-green-600' }
+      return {
+        text: `Chỉ còn ${stock} sản phẩm!`,
+        className: 'text-orange-600',
+      }
+    return { text: 'Còn hàng', className: 'text-green-600' }
   }
 
-  const stockStatus = selectedVariant
-    ? getStockStatus(selectedVariant.stock)
-    : null
+  const stockStatus = useMemo(
+    () => (selectedVariant ? getStockStatus(selectedVariant.stock) : null),
+    [selectedVariant]
+  )
 
   return (
     <div className="space-y-6">
@@ -161,12 +170,14 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
                 setQuantity(Math.min(Math.max(1, val), max))
               }}
               className="w-20"
+              aria-label="Số lượng sản phẩm"
+              aria-describedby="quantity-help"
             />
           </div>
 
           {selectedVariant && (
-            <span className="text-sm text-gray-600">
-              Max: {selectedVariant.stock} available
+            <span id="quantity-help" className="text-sm text-gray-600">
+              Tối đa: {selectedVariant.stock} sản phẩm có sẵn
             </span>
           )}
         </div>
@@ -176,6 +187,13 @@ export function ProductInfo({ product, variants }: ProductInfoProps) {
           disabled={!selectedVariant || selectedVariant.stock === 0}
           className="w-full py-3 text-lg"
           size="lg"
+          aria-label={
+            !selectedVariant
+              ? 'Vui lòng chọn gói dịch vụ'
+              : selectedVariant.stock === 0
+                ? 'Sản phẩm hết hàng'
+                : `Thêm ${quantity} ${product.title} vào giỏ hàng`
+          }
         >
           {!selectedVariant
             ? 'Select a Plan'

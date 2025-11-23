@@ -3,6 +3,7 @@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { formatCurrency } from '@/lib/format'
+import { useMemo } from 'react'
 import type { Variant } from '@/types/product'
 
 interface VariantSelectorProps {
@@ -16,7 +17,10 @@ export function VariantSelector({
   selectedVariantId,
   onVariantChange,
 }: VariantSelectorProps) {
-  const selectedVariant = variants.find(v => v.id === selectedVariantId)
+  const selectedVariant = useMemo(
+    () => variants.find(v => v.id === selectedVariantId),
+    [variants, selectedVariantId]
+  )
 
   const getStockStatus = (stock: number) => {
     if (stock === 0) return { text: 'Out of Stock', className: 'text-red-600' }
@@ -28,10 +32,20 @@ export function VariantSelector({
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Select Plan</h3>
+      <p id="variant-description" className="text-sm text-gray-600">
+        Chọn gói dịch vụ phù hợp với nhu cầu của bạn. Sử dụng phím mũi tên để di
+        chuyển và phím cách để chọn.
+      </p>
+      <div className="text-xs text-gray-500 mt-1">
+        💡 Mẹo: Dùng Tab để di chuyển đến lựa chọn, mũi tên lên/xuống để chọn,
+        Enter hoặc Space để xác nhận
+      </div>
       <RadioGroup
         value={selectedVariantId}
         onValueChange={onVariantChange}
         className="space-y-3"
+        aria-label="Chọn gói dịch vụ"
+        aria-describedby="variant-description"
       >
         {variants.map(variant => {
           const stockStatus = getStockStatus(variant.stock)
@@ -44,6 +58,7 @@ export function VariantSelector({
                 id={variant.id}
                 disabled={isDisabled}
                 className="flex-shrink-0"
+                aria-describedby={`variant-${variant.id}-info`}
               />
               <Label
                 htmlFor={variant.id}
@@ -57,7 +72,10 @@ export function VariantSelector({
                     {formatCurrency(variant.price)}
                   </span>
                 </div>
-                <span className={`text-sm ${stockStatus.className}`}>
+                <span
+                  id={`variant-${variant.id}-info`}
+                  className={`text-sm ${stockStatus.className}`}
+                >
                   {stockStatus.text}
                 </span>
               </Label>

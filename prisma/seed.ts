@@ -16,25 +16,27 @@ async function main() {
   const products = [
     {
       name: 'ChatGPT Plus',
-      description: 'Access to GPT-4, faster response times, and priority access to new features',
+      description:
+        'Access to GPT-4, faster response times, and priority access to new features',
       price: 150000,
       image: '/images/products/chatgpt.jpg',
       category: 'AI Chat',
       variants: [
-        { name: '1 Month', price: 150000, stock: 50 },
-        { name: '3 Months', price: 400000, stock: 30 },
-        { name: '6 Months', price: 750000, stock: 20 },
+        { name: '1 Month', price: 150000, stock: 50, duration: '1 Month' },
+        { name: '3 Months', price: 400000, stock: 30, duration: '3 Months' },
+        { name: '6 Months', price: 750000, stock: 20, duration: '6 Months' },
       ],
     },
     {
       name: 'ChatGPT Team',
-      description: 'Collaborative workspace for teams with unlimited GPT-4 access',
+      description:
+        'Collaborative workspace for teams with unlimited GPT-4 access',
       price: 300000,
       image: '/images/products/chatgpt-team.jpg',
       category: 'AI Chat',
       variants: [
-        { name: '1 Month', price: 300000, stock: 30 },
-        { name: '3 Months', price: 850000, stock: 15 },
+        { name: '1 Month', price: 300000, stock: 30, duration: '1 Month' },
+        { name: '3 Months', price: 850000, stock: 15, duration: '3 Months' },
       ],
     },
     {
@@ -44,8 +46,8 @@ async function main() {
       image: '/images/products/claude.jpg',
       category: 'AI Chat',
       variants: [
-        { name: '1 Month', price: 180000, stock: 45 },
-        { name: '6 Months', price: 900000, stock: 10 },
+        { name: '1 Month', price: 180000, stock: 45, duration: '1 Month' },
+        { name: '6 Months', price: 900000, stock: 10, duration: '6 Months' },
       ],
     },
     {
@@ -55,8 +57,9 @@ async function main() {
       image: '/images/products/claude-api.jpg',
       category: 'AI Chat',
       variants: [
-        { name: '1 Month', price: 250000, stock: 40 },
-        { name: '3 Months', price: 700000, stock: 20 },
+        { name: '1 Month', price: 150000, stock: 50, duration: '1 Month' },
+        { name: '3 Months', price: 400000, stock: 30, duration: '3 Months' },
+        { name: '6 Months', price: 750000, stock: 20, duration: '6 Months' },
       ],
     },
     {
@@ -66,8 +69,18 @@ async function main() {
       image: '/images/products/dalle.jpg',
       category: 'AI Art',
       variants: [
-        { name: '100 Credits', price: 120000, stock: 60 },
-        { name: '500 Credits', price: 550000, stock: 30 },
+        {
+          name: '100 Credits',
+          price: 120000,
+          stock: 60,
+          duration: '100 Credits',
+        },
+        {
+          name: '500 Credits',
+          price: 550000,
+          stock: 30,
+          duration: '500 Credits',
+        },
       ],
     },
     {
@@ -77,9 +90,19 @@ async function main() {
       image: '/images/products/midjourney.jpg',
       category: 'AI Art',
       variants: [
-        { name: 'Basic Plan', price: 350000, stock: 25 },
-        { name: 'Standard Plan', price: 700000, stock: 15 },
-        { name: 'Pro Plan', price: 1400000, stock: 10 },
+        {
+          name: 'Basic Plan',
+          price: 350000,
+          stock: 25,
+          duration: 'Basic Plan',
+        },
+        {
+          name: 'Standard Plan',
+          price: 700000,
+          stock: 15,
+          duration: 'Standard Plan',
+        },
+        { name: 'Pro Plan', price: 1400000, stock: 10, duration: 'Pro Plan' },
       ],
     },
     {
@@ -89,8 +112,8 @@ async function main() {
       image: '/images/products/github-copilot.jpg',
       category: 'AI Coding',
       variants: [
-        { name: '1 Month', price: 280000, stock: 50 },
-        { name: '1 Year', price: 2800000, stock: 20 },
+        { name: '1 Month', price: 280000, stock: 50, duration: '1 Month' },
+        { name: '1 Year', price: 2800000, stock: 20, duration: '1 Year' },
       ],
     },
     {
@@ -100,35 +123,44 @@ async function main() {
       image: '/images/products/gemini.jpg',
       category: 'AI Chat',
       variants: [
-        { name: '1 Month', price: 220000, stock: 35 },
-        { name: '6 Months', price: 1200000, stock: 15 },
+        { name: '1 Month', price: 220000, stock: 35, duration: '1 Month' },
+        { name: '6 Months', price: 1200000, stock: 15, duration: '6 Months' },
       ],
     },
   ]
 
   for (const productData of products) {
     const { variants, ...productInfo } = productData
-    
+
     const product = await prisma.product.create({
-      data: {
-        ...productInfo,
-        variants: {
-          create: variants,
-        },
-      },
-      include: {
-        variants: true,
-      },
+      data: productInfo,
     })
 
-    console.log(`✅ Created product: ${product.name} with ${product.variants.length} variants`)
+    // Create variants separately
+    for (const variantData of variants) {
+      await prisma.variant.create({
+        data: {
+          ...variantData,
+          productId: product.id,
+        },
+      })
+    }
+
+    const createdProduct = await prisma.product.findUnique({
+      where: { id: product.id },
+      include: { variants: true },
+    })
+
+    console.log(
+      `✅ Created product: ${product.name} with ${createdProduct?.variants.length || 0} variants`
+    )
   }
 
   console.log('🎉 Database seed completed!')
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Seed error:', e)
     process.exit(1)
   })

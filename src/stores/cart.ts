@@ -2,7 +2,7 @@
 
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { CartItem } from '@/types/product'
+import type { CartItem, Product } from '@/types/product'
 import { storage } from '@/lib/utils'
 
 interface CartState {
@@ -11,7 +11,7 @@ interface CartState {
 
 interface CartActions {
   addItem: (
-    product: any,
+    product: Product,
     quantity?: number,
     variantId?: string,
     variantName?: string

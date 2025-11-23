@@ -49,9 +49,11 @@ export default async function AdminDashboardPage() {
             <ShoppingCart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orderStats.totalOrders}</div>
+            <div className="text-2xl font-bold">
+              {orderStats.stats?.totalOrders || 0}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {orderStats.pendingOrders} pending
+              {orderStats.stats?.pendingOrders || 0} pending
             </p>
           </CardContent>
         </Card>
@@ -76,10 +78,10 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${Number(orderStats.totalRevenue).toLocaleString()}
+              ${Number(orderStats.stats?.totalRevenue || 0).toLocaleString()}
             </div>
             <p className="text-xs text-muted-foreground">
-              From {orderStats.deliveredOrders} delivered orders
+              From {orderStats.stats?.paidOrders || 0} paid orders
             </p>
           </CardContent>
         </Card>
