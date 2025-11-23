@@ -183,7 +183,7 @@ export default async function AdminOrdersPage({
           </div>
         </CardHeader>
         <CardContent>
-          {orders.length === 0 ? (
+          {!orders || orders.length === 0 ? (
             <div className="text-center py-12">
               <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <ShoppingCart className="h-12 w-12 text-gray-400" />
@@ -216,7 +216,8 @@ export default async function AdminOrdersPage({
                   </TableHeader>
                   <TableBody>
                     {orders.map(order => {
-                      const statusInfo = statusConfig[order.status]
+                      const statusInfo =
+                        statusConfig[order.status as keyof typeof statusConfig]
 
                       return (
                         <TableRow key={order.id}>
@@ -238,11 +239,9 @@ export default async function AdminOrdersPage({
                             <div className="flex items-center">
                               <User className="mr-2 h-4 w-4 text-gray-400" />
                               <div>
-                                <p className="font-medium">
-                                  {order.user.name || 'N/A'}
-                                </p>
+                                <p className="font-medium">Guest</p>
                                 <p className="text-sm text-gray-500">
-                                  {order.user.email}
+                                  {order.customerEmail}
                                 </p>
                               </div>
                             </div>
@@ -250,7 +249,9 @@ export default async function AdminOrdersPage({
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center">
                               <Package className="mr-2 h-4 w-4 text-gray-400" />
-                              {order._count.orderItems}
+                              {Array.isArray(order.items)
+                                ? order.items.length
+                                : 0}
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-medium">

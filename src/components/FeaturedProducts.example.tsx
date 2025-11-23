@@ -21,6 +21,7 @@ export function FeaturedProductsCustomProducts() {
     {
       id: 'special-chatgpt',
       title: 'ChatGPT Plus - 3 Months Special',
+      slug: 'chatgpt-plus-special',
       price: 400000,
       originalPrice: 540000,
       rating: 4.9,
@@ -30,6 +31,7 @@ export function FeaturedProductsCustomProducts() {
     {
       id: 'bundle-claude-gemini',
       title: 'Claude Pro + Gemini Advanced Bundle',
+      slug: 'claude-gemini-bundle',
       price: 300000,
       originalPrice: 360000,
       rating: 4.8,
@@ -39,6 +41,7 @@ export function FeaturedProductsCustomProducts() {
     {
       id: 'midjourney-yearly',
       title: 'Midjourney Yearly Subscription',
+      slug: 'midjourney-yearly',
       price: 1200000,
       originalPrice: 1500000,
       rating: 4.7,
@@ -66,6 +69,7 @@ export function FeaturedProductsMinimal() {
     {
       id: 'chatgpt-basic',
       title: 'ChatGPT Plus - 1 Month',
+      slug: 'chatgpt-basic',
       price: 150000,
       rating: 4.8,
       image: '/images/products/chatgpt.jpg',
@@ -74,6 +78,7 @@ export function FeaturedProductsMinimal() {
     {
       id: 'claude-basic',
       title: 'Claude Pro - 1 Month',
+      slug: 'claude-basic',
       price: 180000,
       rating: 4.7,
       image: '/images/products/claude.jpg',

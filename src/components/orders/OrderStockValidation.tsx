@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { AlertCircle, Package } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 interface StockInfo {
   variantId: string
@@ -55,7 +56,18 @@ export function OrderStockValidation({
           setStockInfo(data.stockInfo)
         }
       } catch (error) {
-        console.error('Error fetching stock info:', error)
+        if (error instanceof Error) {
+          logger.error('Failed to fetch stock information', {
+            errorMessage: error.message,
+            orderItemsCount: orderItems.length,
+            stack: error.stack,
+          })
+        } else {
+          logger.error('Unknown error fetching stock info', {
+            error,
+            orderItemsCount: orderItems.length,
+          })
+        }
       } finally {
         setLoading(false)
       }

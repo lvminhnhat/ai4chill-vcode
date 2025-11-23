@@ -7,6 +7,7 @@ import { Star } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@/lib/format'
 
 export interface ProductCardProps {
   id: string
@@ -77,13 +78,6 @@ const ProductCard = React.forwardRef<
       ))
     }
 
-    const formatPrice = (amount: number) => {
-      return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-      }).format(amount)
-    }
-
     return (
       <Card
         ref={ref}
@@ -146,11 +140,11 @@ const ProductCard = React.forwardRef<
             {/* Price */}
             <div className="mb-4 flex items-center gap-2">
               <span className="text-lg font-bold text-primary">
-                {formatPrice(price)}
+                {formatCurrency(price)}
               </span>
               {hasDiscount && (
                 <span className="text-sm text-muted-foreground line-through">
-                  {formatPrice(originalPrice!)}
+                  {formatCurrency(originalPrice!)}
                 </span>
               )}
             </div>

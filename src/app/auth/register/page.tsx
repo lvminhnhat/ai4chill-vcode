@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import Link from 'next/link'
+import { logger } from '@/lib/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -154,8 +155,34 @@ export default function RegisterPage() {
         )
       }
     } catch (error) {
-      console.error('Registration error:', error)
-      setServerError('Không thể kết nối đến máy chủ. Vui lòng thử lại.')
+      if (error instanceof Error) {
+        if (
+          error.message.includes('email') ||
+          error.message.includes('duplicate')
+        ) {
+          setServerError('Email này đã được sử dụng. Vui lòng chọn email khác.')
+        } else if (
+          error.message.includes('password') ||
+          error.message.includes('weak')
+        ) {
+          setServerError('Mật khẩu không đủ mạnh. Vui lòng chọn mật khẩu khác.')
+        } else if (
+          error.message.includes('network') ||
+          error.message.includes('fetch')
+        ) {
+          setServerError('Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.')
+        } else {
+          setServerError('Đăng ký thất bại. Vui lòng thử lại sau.')
+        }
+        logger.error('Registration failed', {
+          errorMessage: error.message,
+          email: data.email,
+          stack: error.stack,
+        })
+      } else {
+        setServerError('Đã xảy ra lỗi không xác định. Vui lòng liên hệ hỗ trợ.')
+        logger.error('Unknown registration error', { error, email: data.email })
+      }
     } finally {
       setIsLoading(false)
     }

@@ -116,7 +116,7 @@ export default async function OrderDetailPage({
           quantity: item.quantity,
         }))
       )
-      hasSufficientStock = stockCheck.hasSufficientStock
+      hasSufficientStock = stockCheck.available
     } catch (error) {
       console.error('Error checking stock:', error)
       // Default to false if we can't check stock

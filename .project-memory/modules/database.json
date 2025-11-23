@@ -87,6 +87,7 @@
   "notes": [
     "Database layer updated with Account and Transaction models",
     "Account.encryptedCredentials stored via AES-256-GCM; server-side encryption/decryption helpers in files/services/encryption-service.json",
-    "Transaction model added to track Sepay payments and reconcile order status"
+    "Transaction model added to track Sepay payments and reconcile order status",
+    "PR #32: Added OrderTemp migration (prisma/migrations/20251123120000_add_order_temp_table) to support temporary/staging orders used by fulfillment workflows"
   ]
 }

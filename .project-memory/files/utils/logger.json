@@ -1,0 +1,13 @@
+{
+  "path": "src/lib/logger.ts",
+  "type": "utility",
+  "lastModified": "2025-11-23T13:50:00Z",
+  "dependencies": ["pino"],
+  "exports": ["createLogger", "logInfo", "logWarn", "logError"],
+  "notes": [
+    "Lightweight server-side logger utility added to standardize structured logging",
+    "Wraps pino and exposes createLogger factory for per-module loggers",
+    "Used by API routes and background tasks",
+    "Follow up: add transport and log rotation in production if needed"
+  ]
+}
