@@ -167,6 +167,34 @@
         "Add automated integration tests for payment and fulfillment flows",
         "Document admin role onboarding and permissions matrix"
       ]
+    },
+    {
+      "id": "session-user-issues-2025-11-23",
+      "startedAt": "2025-11-23T12:00:00Z",
+      "endedAt": "2025-11-23T12:10:00Z",
+      "performedBy": "user",
+      "issueReference": "STORY-01-03 (#4)",
+      "summary": "Checked project issues and reported that 'STORY-01-03' (Setup CI/CD Pipeline) is in progress; others are closed.",
+      "details": {
+        "userRequest": "kiểm tra giúp tôi xem dự án đang làm issue nào",
+        "intent": "check project issues and list active issues",
+        "references": [".project-memory/core/issues.json", "PR #5"]
+      },
+      "status": "completed"
+    },
+    {
+      "id": "session-continue-issue-28-2025-11-23T12:30:00Z",
+      "startedAt": "2025-11-23T12:30:00Z",
+      "endedAt": null,
+      "performedBy": "user",
+      "issueReference": "STORY-04-01 (#28)",
+      "purpose": "User requested to continue or extend work on Issue #28 (Sepay Payment Integration). Verify remaining tasks or extend the issue.",
+      "notes": [
+        "Issue #28 is marked closed/completed on 2025-11-23 with commit 3455c2e per issues.json.",
+        "Session started to verify status and determine next steps (reopen, create follow-up issue, or additional tasks)."
+      ],
+      "relatedCommits": ["3455c2e"],
+      "status": "in_progress"
     }
   ]
 }
