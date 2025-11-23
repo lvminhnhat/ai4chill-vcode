@@ -1,0 +1,24 @@
+{
+  "path": "src/app/(admin)/layout.tsx",
+  "type": "component",
+  "lastModified": "2025-11-23T11:30:00Z",
+  "dependencies": [
+    "react",
+    "next/navigation",
+    "@/components/ui/sidebar",
+    "@/lib/auth"
+  ],
+  "props": {},
+  "patterns": {
+    "layout": "Sidebar + content area, responsive; uses shadcn/ui primitives",
+    "navigation": "Admin sidebar with grouped links (Products, Inventory, Orders, Payments, Fulfillment)"
+  },
+  "relatedFiles": [
+    "src/app/(admin)/page.tsx",
+    "src/components/admin/Sidebar.tsx"
+  ],
+  "notes": [
+    "Protects nested admin routes via middleware or server-side checks",
+    "Provides common header, breadcrumb and role-aware menu items"
+  ]
+}

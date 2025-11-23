@@ -1,0 +1,16 @@
+{
+  "path": "src/lib/encryption.ts",
+  "type": "service",
+  "lastModified": "2025-11-23T11:20:00Z",
+  "dependencies": ["crypto"],
+  "functions": [
+    "encryptAes256Gcm(plaintext, key)",
+    "decryptAes256Gcm(ciphertext, key)",
+    "generateKeyFromEnv(secret)"
+  ],
+  "notes": [
+    "AES-256-GCM used for encrypting Account credentials before storing in DB",
+    "Key material derived from ENV (e.g., ENCRYPTION_KEY) and not checked into git",
+    "Implementation resides in src/lib/encryption.ts and used by inventory and fulfillment flows"
+  ]
+}

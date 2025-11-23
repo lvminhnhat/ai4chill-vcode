@@ -1,0 +1,24 @@
+{
+  "path": "src/app/(admin)/orders/page.tsx",
+  "type": "component",
+  "lastModified": "2025-11-23T11:45:00Z",
+  "dependencies": [
+    "react",
+    "@/lib/db",
+    "@/components/ui/table",
+    "@/components/ui/pagination"
+  ],
+  "props": {},
+  "patterns": {
+    "filters": "Server-side filtering and pagination; query params for status, date-range, search",
+    "statusUpdates": "Server Actions to update order status with validation"
+  },
+  "relatedFiles": [
+    "src/components/admin/OrderFilters.tsx",
+    "src/components/admin/OrderRow.tsx"
+  ],
+  "notes": [
+    "Order management view supports filtering, pagination and bulk actions",
+    "Fulfillment actions available inline to trigger manual fulfillment flow"
+  ]
+}

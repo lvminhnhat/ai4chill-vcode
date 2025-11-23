@@ -1,0 +1,5 @@
+{
+  "path": "prisma/schema.prisma",
+  "lastRead": "2025-11-23T12:10:00Z",
+  "summary": "Prisma schema updated to include UserRole enum, Account model for encrypted inventory credentials, and Transaction model for payment gateway transactions. OrderStatus enum expanded to include PAID."
+}

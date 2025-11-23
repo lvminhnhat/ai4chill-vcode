@@ -64,7 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: user.id,
             email: user.email,
             name: user.name,
-            // Note: role field removed - not in database schema
+            role: user.role,
           }
         } catch (error) {
           console.error('Auth error:', error)
@@ -93,6 +93,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Store user data in token
         token.email = user.email
         token.name = user.name
+        token.role = user.role
       }
       return token
     },
@@ -101,7 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub!
         session.user.email = token.email as string
         session.user.name = token.name as string | null
-        // Note: role removed - not in database schema
+        session.user.role = token.role as 'USER' | 'ADMIN'
       }
       return session
     },

@@ -1,11 +1,18 @@
 {
   "path": "src/services/types.ts",
   "type": "service-types",
-  "lastModified": "2025-11-19T00:00:00Z",
-  "exports": ["ApiResponse", "ApiError", "API_CONFIG"],
+  "lastModified": "2025-11-23T12:05:00Z",
+  "exports": [
+    "ApiResponse",
+    "ApiError",
+    "API_CONFIG",
+    "Transaction",
+    "AccountRecord"
+  ],
   "notes": [
     "ApiResponse<T> wrapper for API responses",
     "ApiError shape for error handling",
-    "API_CONFIG uses NEXT_PUBLIC_API_URL fallback to http://localhost:3001/api"
+    "API_CONFIG uses NEXT_PUBLIC_API_URL fallback to http://localhost:3001/api",
+    "Transaction and AccountRecord types added for payment and inventory services"
   ]
 }

@@ -1,0 +1,37 @@
+{
+  "name": "payment",
+  "responsibilities": [
+    "Sepay payment gateway integration",
+    "Generate QR codes for Sepay payments",
+    "Record and reconcile transactions",
+    "Expose payment webhook endpoints"
+  ],
+  "patterns": {
+    "integration": "Server-side Sepay SDK / HTTP integration; generate QR on server and render client-side",
+    "security": "Sign and verify webhooks; store minimal payment metadata in DB; use Transactions model",
+    "idempotency": "Use transaction references and idempotency keys for payment creation",
+    "errorHandling": "Retry logic for transient errors, clear failure states"
+  },
+  "apiEndpoints": [
+    {
+      "path": "/api/payments/create",
+      "methods": ["POST"],
+      "notes": "Create Sepay payment session and return QR payload"
+    },
+    {
+      "path": "/api/payments/webhook",
+      "methods": ["POST"],
+      "notes": "Sepay webhook receiver to update Transaction and Order status"
+    },
+    {
+      "path": "/api/payments/transactions",
+      "methods": ["GET"],
+      "notes": "Admin-facing transaction list with filters and pagination"
+    }
+  ],
+  "notes": [
+    "Payment QR generation component added (PaymentQRCode)",
+    "Transactions persisted in Transaction model (prisma)",
+    "Integration uses AES-256-GCM for any sensitive payload encryption at rest/in-transit when needed"
+  ]
+}

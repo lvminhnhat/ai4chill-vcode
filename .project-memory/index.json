@@ -1,15 +1,38 @@
 {
-  "version": "1.0.3",
-  "lastUpdated": "2025-11-21T00:15:00Z",
+  "version": "1.0.4",
+  "lastUpdated": "2025-11-23T12:00:00Z",
   "structure": {
     "core": ["project", "tech-stack", "git", "issues", "env", "session"],
     "architecture": ["patterns", "folder-structure", "dependencies"],
     "standards": ["naming", "formatting", "imports", "testing"],
-    "modules": ["auth", "api", "ui", "database"],
+    "modules": [
+      "auth",
+      "api",
+      "ui",
+      "database",
+      "admin",
+      "payment",
+      "fulfillment"
+    ],
     "files": {
-      "components": ["Button"],
-      "services": ["types", "db", "test-db"],
-      "utils": ["helpers"],
+      "components": [
+        "Button",
+        "AdminLayout",
+        "InventoryManagement",
+        "OrderManagementView",
+        "PaymentQRCode",
+        "FulfillmentFlow"
+      ],
+      "services": [
+        "types",
+        "db",
+        "test-db",
+        "sepay-service",
+        "fulfillment-service",
+        "resend-service",
+        "encryption-service"
+      ],
+      "utils": ["helpers", "auth-helpers", "encryption"],
       "config": [
         "tsconfig",
         "eslint",
@@ -36,7 +59,22 @@
       "apiWork": ["modules/api", "files/services/types"],
       "authWork": ["modules/auth"],
       "initialization": ["core/git", "core/env", "core/session"],
-      "dbInit": ["modules/database", "files/services/db", "files/prisma/schema"]
+      "dbInit": [
+        "modules/database",
+        "files/services/db",
+        "files/prisma/schema"
+      ],
+      "adminWork": ["modules/admin", "files/utils/auth-helpers"],
+      "paymentWork": [
+        "modules/payment",
+        "files/services/sepay-service",
+        "files/services/encryption-service"
+      ],
+      "fulfillmentWork": [
+        "modules/fulfillment",
+        "files/services/fulfillment-service",
+        "files/services/resend-service"
+      ]
     }
   }
 }

@@ -38,6 +38,7 @@ async function testDatabaseConnection() {
         productId: product.id,
         name: 'Large',
         price: 29.99,
+        duration: '1 month',
         stock: 100,
       },
     })
@@ -51,6 +52,8 @@ async function testDatabaseConnection() {
         userId: user.id,
         total: 29.99,
         status: 'PENDING',
+        invoiceNumber: `TEST-INV-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        paymentMethod: 'BANK_TRANSFER',
         orderItems: {
           create: {
             productId: product.id,
@@ -59,9 +62,6 @@ async function testDatabaseConnection() {
             price: 29.99,
           },
         },
-      },
-      include: {
-        orderItems: true,
       },
     })
     if (process.env.NODE_ENV === 'development') {

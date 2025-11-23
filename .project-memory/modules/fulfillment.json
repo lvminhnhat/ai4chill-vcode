@@ -1,0 +1,31 @@
+{
+  "name": "fulfillment",
+  "responsibilities": [
+    "Manual fulfillment flow for orders",
+    "Automated email delivery using Resend",
+    "Tracking fulfillment status and history"
+  ],
+  "patterns": {
+    "workflow": "Manual fulfillment steps implemented as Server Actions; status transitions validated server-side",
+    "email": "Resend API used for transactional emails (fulfillment notifications, delivery confirmations)",
+    "security": "Avoid storing raw credentials; use encrypted storage for inventory/external account credentials",
+    "audit": "Record fulfillment events in DB with user and timestamp"
+  },
+  "apiEndpoints": [
+    {
+      "path": "/api/fulfillment/manual",
+      "methods": ["POST"],
+      "notes": "Trigger manual fulfillment, optionally send email via Resend"
+    },
+    {
+      "path": "/api/fulfillment/events",
+      "methods": ["GET"],
+      "notes": "Fetch fulfillment history for an order"
+    }
+  ],
+  "notes": [
+    "Manual fulfillment implemented with an admin UI (FulfillmentFlow component)",
+    "Email delivery uses Resend service; templates stored in /src/lib/email or services",
+    "Comprehensive test scripts added (scripts/test-fulfillment-flow.ts)"
+  ]
+}
