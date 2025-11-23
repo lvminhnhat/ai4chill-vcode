@@ -90,6 +90,7 @@ export default function PaymentTestPage() {
               quantity: quantity,
             },
           ],
+          paymentMethod: 'BANK_TRANSFER', // Default payment method for testing
         }),
       })
 
@@ -235,11 +236,37 @@ export default function PaymentTestPage() {
               </CardContent>
             </Card>
 
-            {/* Payment QR Code */}
+            {/* Order Details */}
+            <Card className="max-w-md mx-auto">
+              <CardContent className="pt-6">
+                <div className="space-y-3">
+                  <div>
+                    <span className="text-sm text-gray-500">Order ID:</span>
+                    <p className="font-medium">
+                      #{orderResult.orderId.slice(-8)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">
+                      Invoice Number:
+                    </span>
+                    <p className="font-medium">{orderResult.invoiceNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-gray-500">Total Amount:</span>
+                    <p className="font-medium text-lg">
+                      {formatAmount(orderResult.totalAmount)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment QR Code - using invoice number */}
             <PaymentQRCode
               orderId={orderResult.orderId}
               amount={orderResult.totalAmount}
-              qrUrl={orderResult.qrUrl}
+              qrUrl={orderResult.invoiceNumber} // Using invoice number instead of qrUrl
               onPaymentComplete={handlePaymentComplete}
             />
 

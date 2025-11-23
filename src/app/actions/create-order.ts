@@ -1,8 +1,10 @@
 'use server'
 
 import { prisma } from '@/lib/db'
-import { generateQRUrl } from '@/lib/sepay'
+import { generateInvoiceNumber } from '@/lib/sepay-sdk'
 import { z } from 'zod'
+
+export type PaymentMethod = 'BANK_TRANSFER' | 'CARD' | 'NAPAS_BANK_TRANSFER'
 
 const CreateOrderItemSchema = z.object({
   variantId: z.string().min(1, 'Variant ID is required'),
@@ -12,6 +14,9 @@ const CreateOrderItemSchema = z.object({
 const CreateOrderSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   items: z.array(CreateOrderItemSchema).min(1, 'At least one item is required'),
+  paymentMethod: z
+    .enum(['BANK_TRANSFER', 'CARD', 'NAPAS_BANK_TRANSFER'])
+    .default('BANK_TRANSFER'),
 })
 
 export type CreateOrderInput = z.infer<typeof CreateOrderSchema>
@@ -19,7 +24,7 @@ export type CreateOrderInput = z.infer<typeof CreateOrderSchema>
 export interface CreateOrderResult {
   success: boolean
   orderId?: string
-  qrUrl?: string
+  invoiceNumber?: string
   totalAmount?: number
   error?: string
 }
@@ -36,7 +41,7 @@ export async function createOrder(
   try {
     // Validate input
     const validatedInput = CreateOrderSchema.parse(input)
-    const { userId, items } = validatedInput
+    const { userId, items, paymentMethod } = validatedInput
 
     // Verify user exists
     const user = await prisma.user.findUnique({
@@ -108,6 +113,9 @@ export async function createOrder(
       })
     }
 
+    // Generate invoice number
+    const invoiceNumber = generateInvoiceNumber()
+
     // Create order and order items in a transaction
     const result = await prisma.$transaction(async tx => {
       // Create order
@@ -116,6 +124,8 @@ export async function createOrder(
           userId,
           total: totalAmount,
           status: 'PENDING',
+          invoiceNumber,
+          paymentMethod,
         },
         include: {
           orderItems: true,
@@ -157,13 +167,10 @@ export async function createOrder(
       }
     })
 
-    // Generate Sepay QR URL
-    const qrUrl = generateQRUrl(result.order.id, totalAmount)
-
     return {
       success: true,
       orderId: result.order.id,
-      qrUrl,
+      invoiceNumber,
       totalAmount,
     }
   } catch (error) {

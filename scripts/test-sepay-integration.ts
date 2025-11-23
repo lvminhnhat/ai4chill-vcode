@@ -30,6 +30,7 @@ async function testSepayIntegration() {
     const orderResult = await createOrder({
       userId: testUserId,
       items: testItems,
+      paymentMethod: 'BANK_TRANSFER',
     })
 
     if (!orderResult.success) {
@@ -39,8 +40,8 @@ async function testSepayIntegration() {
 
     console.log('✅ Order created successfully!')
     console.log(`   Order ID: ${orderResult.orderId}`)
-    console.log(`   Total Amount: ${orderResult.totalAmount} VND`)
-    console.log(`   QR URL: ${orderResult.qrUrl}\n`)
+    console.log(`   Invoice Number: ${orderResult.invoiceNumber}`)
+    console.log(`   Total Amount: ${orderResult.totalAmount} VND\n`)
 
     // Wait a bit (simulating customer scanning QR)
     console.log('2️⃣ Simulating payment webhook...')

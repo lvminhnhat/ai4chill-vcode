@@ -109,6 +109,8 @@ async function createTestOrders() {
           userId: orderData.userId,
           total: orderData.total,
           status: orderData.status,
+          invoiceNumber: `TEST-INV-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          paymentMethod: 'BANK_TRANSFER',
           orderItems: {
             create: orderData.orderItems,
           },

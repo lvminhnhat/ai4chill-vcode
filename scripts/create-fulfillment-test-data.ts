@@ -108,6 +108,8 @@ async function createFulfillmentTestData() {
           userId: testUser.id,
           total: totalAmount,
           status: 'PAID' as any,
+          invoiceNumber: `FULFILL-INV-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          paymentMethod: 'BANK_TRANSFER',
           orderItems: {
             create: orderItems,
           },
