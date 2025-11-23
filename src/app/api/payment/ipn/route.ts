@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { validateIpnSignature } from '@/lib/sepay-sdk'
 import { SepayIpnPayload, SepayIpnStatus } from '@/types/sepay-ipn'
+import { isIPAllowed, getClientIP } from '@/lib/sepay-ip-validator'
+import { OrderStatus } from '@/generated/prisma'
+
+const AMOUNT_TOLERANCE_VND = 1 // Only 1 VND tolerance for rounding errors
 
 /**
  * Order status mapping from SePay IPN status
  */
-const ORDER_STATUS_MAP: Record<SepayIpnStatus, string> = {
-  ORDER_PAID: 'CONFIRMED',
-  ORDER_FAILED: 'CANCELLED',
-  ORDER_PENDING: 'PENDING',
-  ORDER_PROCESSING: 'PROCESSING',
-  ORDER_CANCELLED: 'CANCELLED',
+const ORDER_STATUS_MAP: Record<SepayIpnStatus, OrderStatus> = {
+  ORDER_PAID: OrderStatus.PAID, // Using PAID instead of CONFIRMED as it doesn't exist in schema
+  ORDER_FAILED: OrderStatus.CANCELLED,
+  ORDER_PENDING: OrderStatus.PENDING,
+  ORDER_PROCESSING: OrderStatus.PROCESSING,
+  ORDER_CANCELLED: OrderStatus.CANCELLED,
 }
 
 /**
@@ -35,6 +39,34 @@ export async function POST(request: NextRequest) {
   console.log('SePay IPN webhook received')
 
   try {
+    // IP whitelist validation
+    const allowedIPs =
+      process.env.SEPAY_ALLOWED_IPS?.split(',').map(ip => ip.trim()) || []
+
+    if (allowedIPs.length > 0) {
+      try {
+        const clientIP = getClientIP(request)
+
+        if (!isIPAllowed(clientIP, allowedIPs)) {
+          console.error(
+            `Unauthorized IP attempt: ${clientIP} from allowed IPs: ${allowedIPs.join(', ')}`
+          )
+          return NextResponse.json(
+            { error: 'Forbidden - IP not allowed' },
+            { status: 403 }
+          )
+        }
+
+        console.log(`IP validation passed: ${clientIP}`)
+      } catch (error) {
+        console.error('Error during IP validation:', error)
+        // Continue processing if IP detection fails, but log the error
+      }
+    } else {
+      console.warn(
+        'SEPAY_ALLOWED_IPS environment variable not set - IP validation disabled'
+      )
+    }
     // Get raw body for signature validation
     const rawBody = await request.text()
 
@@ -116,10 +148,11 @@ export async function POST(request: NextRequest) {
     const orderTotal = Number(order.total)
     const paymentAmount = payload.amount
 
-    if (Math.abs(orderTotal - paymentAmount) > 100) {
-      // Allow small difference (100 VND)
+    if (Math.abs(orderTotal - paymentAmount) > AMOUNT_TOLERANCE_VND) {
       console.error(
-        `Amount mismatch for order ${payload.order_invoice_number}: expected ${orderTotal}, got ${paymentAmount}`
+        `Amount mismatch for order ${payload.order_invoice_number}: ` +
+          `expected ${orderTotal}, got ${paymentAmount}, ` +
+          `difference: ${Math.abs(orderTotal - paymentAmount)} VND`
       )
       return NextResponse.json({ error: 'Amount mismatch' }, { status: 400 })
     }
@@ -140,9 +173,13 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Map SePay status to our order status
-    const newOrderStatus =
-      ORDER_STATUS_MAP[payload.status as SepayIpnStatus] || order.status
+    // Validate mapped status
+    const newOrderStatus = ORDER_STATUS_MAP[payload.status as SepayIpnStatus]
+    if (!newOrderStatus) {
+      console.error(`Unknown SePay status: ${payload.status}`)
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
+    }
+
     const newTransactionStatus =
       TRANSACTION_STATUS_MAP[payload.status as SepayIpnStatus] || 'PENDING'
 
@@ -152,7 +189,7 @@ export async function POST(request: NextRequest) {
       const updatedOrder = await tx.order.update({
         where: { id: order.id },
         data: {
-          status: newOrderStatus as any,
+          status: newOrderStatus,
           paymentMethod: payload.payment_method,
         },
         include: {
@@ -171,7 +208,7 @@ export async function POST(request: NextRequest) {
           provider: 'SEPAY',
           sepayOrderId: payload.sepay_order_id,
           paymentMethod: payload.payment_method,
-          gatewayData: payload as any,
+          gatewayData: payload,
           reference: transactionReference,
         },
       })
