@@ -27,6 +27,11 @@
       "path": "/api/admin/inventory",
       "methods": ["GET", "POST", "PUT"],
       "notes": "Inventory management endpoints (encrypted credentials)"
+    },
+    {
+      "path": "/api/admin/inventory-management",
+      "methods": ["GET", "POST", "PUT"],
+      "notes": "New inventory-management routes added in PR #32; replaces previous overlapping inventory endpoints"
     }
   ],
   "helpers": [
@@ -37,6 +42,7 @@
     "Admin role added to NextAuth session on sign-in",
     "middleware.ts updated to protect /admin routes",
     "Admin layout created at src/app/(admin)/ with sidebar navigation",
-    "Uses Server Actions for admin CRUD to keep logic on server and simplify access control"
+    "Uses Server Actions for admin CRUD to keep logic on server and simplify access control",
+    "PR #32: added new inventory-management routes and removed duplicate routes conflict that caused ambiguous matching"
   ]
 }

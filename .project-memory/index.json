@@ -1,6 +1,6 @@
 {
-  "version": "1.0.4",
-  "lastUpdated": "2025-11-23T12:00:00Z",
+  "version": "1.0.5",
+  "lastUpdated": "2025-11-23T14:00:00Z",
   "structure": {
     "core": ["project", "tech-stack", "git", "issues", "env", "session"],
     "architecture": ["patterns", "folder-structure", "dependencies"],
@@ -32,7 +32,7 @@
         "resend-service",
         "encryption-service"
       ],
-      "utils": ["helpers", "auth-helpers", "encryption"],
+      "utils": ["helpers", "auth-helpers", "encryption", "logger"],
       "config": [
         "tsconfig",
         "eslint",

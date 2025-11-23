@@ -1,0 +1,11 @@
+{
+  "path": "prisma/migrations/20251123120000_add_order_temp_table/migration.sql",
+  "type": "migration",
+  "lastModified": "2025-11-23T13:45:00Z",
+  "summary": "Adds temporary OrderTemp table used for staging orders before finalization (used by fulfillment flows and temp snapshots).",
+  "notes": [
+    "Migration generated during PR #32 review fixes",
+    "Applied to development database; confirm applied to production during deployment",
+    "Migration directory: prisma/migrations/20251123120000_add_order_temp_table/"
+  ]
+}
