@@ -1,0 +1,16 @@
+{
+  "path": "src/lib/email.ts",
+  "type": "service",
+  "lastModified": "2025-11-23T11:25:00Z",
+  "dependencies": ["resend"],
+  "functions": [
+    "sendFulfillmentEmail(to, templateId, data)",
+    "sendOrderNotification(to, data)",
+    "renderTemplate(templateId, data)"
+  ],
+  "notes": [
+    "Resend used for transactional email delivery",
+    "Templates and API keys kept in ENV (RESEND_API_KEY, RESEND_FROM)",
+    "Email sending performed on server and retried on transient failures"
+  ]
+}

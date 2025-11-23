@@ -1,0 +1,7 @@
+{
+  "path": "src/lib/encryption.ts",
+  "type": "utility",
+  "lastModified": "2025-11-23T11:20:00Z",
+  "functions": ["encryptAes256Gcm", "decryptAes256Gcm", "deriveKeyFromEnv"],
+  "notes": ["Utility helpers for AES-256-GCM encryption used by Account credential storage and secure payloads"]
+}}

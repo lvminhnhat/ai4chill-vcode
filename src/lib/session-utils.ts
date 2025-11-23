@@ -31,11 +31,11 @@ export async function getServerSession(): Promise<Session | null> {
  */
 export async function requireAuth(): Promise<Session> {
   const session = await getServerSession()
-  
+
   if (!session) {
     redirect('/auth/signin')
   }
-  
+
   return session
 }
 
@@ -53,9 +53,49 @@ export async function requireAuth(): Promise<Session> {
  */
 export async function getCurrentUser() {
   const session = await getServerSession()
-  
+
   return session?.user || null
 }
 
-// Note: isAdmin() and requireAdmin() removed - no role field in database schema
-// If you need role-based access control, add role field to database first
+/**
+ * Checks if the current user has admin role
+ * @returns Promise<boolean> - True if user is admin, false otherwise
+ * @example
+ * ```typescript
+ * const isAdminUser = await isAdmin()
+ * if (isAdminUser) {
+ *   console.log('User has admin privileges')
+ * }
+ * ```
+ */
+export async function isAdmin(): Promise<boolean> {
+  const user = await getCurrentUser()
+
+  return user?.role === 'ADMIN'
+}
+
+/**
+ * Requires admin authentication and redirects if not authorized
+ * @returns Promise<Session> - The authenticated admin session
+ * @throws Redirects to /auth/signin if not authenticated, or to /dashboard if not admin
+ * @example
+ * ```typescript
+ * // In a server component or route handler that requires admin access
+ * const session = await requireAdmin()
+ * // User is guaranteed to be authenticated and have admin role here
+ * console.log('Admin user:', session.user.email)
+ * ```
+ */
+export async function requireAdmin(): Promise<Session> {
+  const session = await getServerSession()
+
+  if (!session) {
+    redirect('/auth/signin')
+  }
+
+  if (session.user.role !== 'ADMIN') {
+    redirect('/dashboard')
+  }
+
+  return session
+}

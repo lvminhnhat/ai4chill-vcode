@@ -1,0 +1,19 @@
+{
+  "path": "src/components/PaymentQRCode.tsx",
+  "type": "component",
+  "lastModified": "2025-11-23T11:50:00Z",
+  "dependencies": ["react", "qrcode.react", "@/services/sepay-service"],
+  "props": {
+    "paymentPayload": "object",
+    "size": "number"
+  },
+  "patterns": {
+    "rendering": "Server generates Sepay payload; component renders QR SVG and fallback link",
+    "security": "Do not expose sensitive keys to client; only return tokenized payment payload"
+  },
+  "relatedFiles": ["src/app/test-payment/page.tsx"],
+  "notes": [
+    "Used by checkout flow to display Sepay QR",
+    "Accepts server-provided payload containing QR data or URL"
+  ]
+}
