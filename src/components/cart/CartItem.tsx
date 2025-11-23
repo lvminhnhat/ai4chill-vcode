@@ -16,9 +16,9 @@ export function CartItem({ item }: CartItemProps) {
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity <= 0) {
-      removeItem(item.productId)
+      removeItem(item.productId, item.variantId)
     } else {
-      updateQuantity(item.productId, newQuantity)
+      updateQuantity(item.productId, newQuantity, item.variantId)
     }
   }
 
@@ -41,7 +41,12 @@ export function CartItem({ item }: CartItemProps) {
 
       {/* Product Info */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-medium truncate">{item.title}</h3>
+        <h3 className="text-sm font-medium truncate">
+          {item.title}
+          {item.variantName && (
+            <span className="text-muted-foreground"> - {item.variantName}</span>
+          )}
+        </h3>
         <p className="text-sm text-muted-foreground">
           {formatCurrency(item.priceSnapshot)}
         </p>
@@ -73,7 +78,7 @@ export function CartItem({ item }: CartItemProps) {
         variant="ghost"
         size="icon"
         className="h-8 w-8 text-destructive hover:text-destructive"
-        onClick={() => removeItem(item.productId)}
+        onClick={() => removeItem(item.productId, item.variantId)}
       >
         <X className="h-4 w-4" />
       </Button>

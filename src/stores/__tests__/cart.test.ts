@@ -29,9 +29,18 @@ import type { CartItem } from '@/types/product'
 const createTestCartStore = () => {
   return create<{
     items: CartItem[]
-    addItem: (product: any, quantity?: number) => void
-    removeItem: (productId: string) => void
-    updateQuantity: (productId: string, quantity: number) => void
+    addItem: (
+      product: any,
+      quantity?: number,
+      variantId?: string,
+      variantName?: string
+    ) => void
+    removeItem: (productId: string, variantId?: string) => void
+    updateQuantity: (
+      productId: string,
+      quantity: number,
+      variantId?: string
+    ) => void
     clearCart: () => void
     getItemCount: () => number
     getTotal: () => number
@@ -40,16 +49,17 @@ const createTestCartStore = () => {
       (set, get) => ({
         items: [],
 
-        addItem: (product, quantity = 1) => {
+        addItem: (product, quantity = 1, variantId, variantName) => {
           set(state => {
             const existingItem = state.items.find(
-              item => item.productId === product.id
+              item =>
+                item.productId === product.id && item.variantId === variantId
             )
 
             if (existingItem) {
               return {
                 items: state.items.map(item =>
-                  item.productId === product.id
+                  item.productId === product.id && item.variantId === variantId
                     ? { ...item, quantity: item.quantity + quantity }
                     : item
                 ),
@@ -57,6 +67,8 @@ const createTestCartStore = () => {
             } else {
               const newItem: CartItem = {
                 productId: product.id,
+                variantId,
+                variantName,
                 quantity,
                 priceSnapshot: product.price,
                 title: product.title,
@@ -70,21 +82,26 @@ const createTestCartStore = () => {
           })
         },
 
-        removeItem: productId => {
+        removeItem: (productId, variantId) => {
           set(state => ({
-            items: state.items.filter(item => item.productId !== productId),
+            items: state.items.filter(
+              item =>
+                !(item.productId === productId && item.variantId === variantId)
+            ),
           }))
         },
 
-        updateQuantity: (productId, quantity) => {
+        updateQuantity: (productId, quantity, variantId) => {
           if (quantity <= 0) {
-            get().removeItem(productId)
+            get().removeItem(productId, variantId)
             return
           }
 
           set(state => ({
             items: state.items.map(item =>
-              item.productId === productId ? { ...item, quantity } : item
+              item.productId === productId && item.variantId === variantId
+                ? { ...item, quantity }
+                : item
             ),
           }))
         },
@@ -268,6 +285,91 @@ describe('Cart Store', () => {
       const { result } = renderHook(() => useTestCart())
 
       expect(result.current.getItemCount()).toBe(0)
+    })
+  })
+
+  describe('Variant Support', () => {
+    it('should treat same product with different variants as separate items', () => {
+      const useTestCart = createTestCartStore()
+      const { result } = renderHook(() => useTestCart())
+
+      act(() => {
+        result.current.addItem(mockProduct, 1, 'variant-1', '1 Month')
+        result.current.addItem(mockProduct, 1, 'variant-2', '6 Months')
+      })
+
+      expect(result.current.items).toHaveLength(2)
+      expect(result.current.items[0]).toEqual({
+        productId: '1',
+        variantId: 'variant-1',
+        variantName: '1 Month',
+        quantity: 1,
+        priceSnapshot: 100,
+        title: 'Test Product',
+        image: '/test.jpg',
+        stock: 10,
+      })
+      expect(result.current.items[1]).toEqual({
+        productId: '1',
+        variantId: 'variant-2',
+        variantName: '6 Months',
+        quantity: 1,
+        priceSnapshot: 100,
+        title: 'Test Product',
+        image: '/test.jpg',
+        stock: 10,
+      })
+    })
+
+    it('should update quantity for specific variant', () => {
+      const useTestCart = createTestCartStore()
+      const { result } = renderHook(() => useTestCart())
+
+      act(() => {
+        result.current.addItem(mockProduct, 1, 'variant-1', '1 Month')
+        result.current.addItem(mockProduct, 2, 'variant-2', '6 Months')
+        result.current.updateQuantity('1', 5, 'variant-1')
+      })
+
+      expect(result.current.items).toHaveLength(2)
+      expect(result.current.items[0].quantity).toBe(5) // variant-1 updated
+      expect(result.current.items[1].quantity).toBe(2) // variant-2 unchanged
+    })
+
+    it('should maintain backward compatibility for non-variant products', () => {
+      const useTestCart = createTestCartStore()
+      const { result } = renderHook(() => useTestCart())
+
+      act(() => {
+        result.current.addItem(mockProduct) // No variant parameters
+        result.current.addItem(mockProduct, 2) // Should increase quantity
+      })
+
+      expect(result.current.items).toHaveLength(1)
+      expect(result.current.items[0]).toEqual({
+        productId: '1',
+        variantId: undefined,
+        variantName: undefined,
+        quantity: 3,
+        priceSnapshot: 100,
+        title: 'Test Product',
+        image: '/test.jpg',
+        stock: 10,
+      })
+    })
+
+    it('should remove specific variant item', () => {
+      const useTestCart = createTestCartStore()
+      const { result } = renderHook(() => useTestCart())
+
+      act(() => {
+        result.current.addItem(mockProduct, 1, 'variant-1', '1 Month')
+        result.current.addItem(mockProduct, 1, 'variant-2', '6 Months')
+        result.current.removeItem('1', 'variant-1')
+      })
+
+      expect(result.current.items).toHaveLength(1)
+      expect(result.current.items[0].variantId).toBe('variant-2')
     })
   })
 })
