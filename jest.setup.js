@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+require('@testing-library/jest-dom')
 
 // Set up test environment variables
 process.env.ENCRYPTION_KEY =

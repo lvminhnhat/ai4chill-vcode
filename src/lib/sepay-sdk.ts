@@ -206,33 +206,52 @@ export function validateIpnSignature(
   signature?: string
 ): boolean {
   try {
-    // If SDK provides signature validation method
-    // Note: Based on the SDK types, there doesn't seem to be a built-in validateIpnSignature method
-    // So we'll implement our own validation
-
+    // SECURITY: Always require signature
     if (!signature) {
-      console.warn('No IPN signature provided - validation may be less secure')
-      return true
+      console.error('IPN signature is required but not provided')
+      return false
     }
 
     const webhookSecret = process.env.SEPAY_WEBHOOK_SECRET
+
+    // SECURITY: Fail fast if secret not configured in production
     if (!webhookSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          'SEPAY_WEBHOOK_SECRET must be configured in production. ' +
+            'This is a critical security requirement to prevent payment fraud.'
+        )
+      }
+
       console.warn(
-        'SEPAY_WEBHOOK_SECRET not configured - skipping signature validation'
+        '⚠️  SEPAY_WEBHOOK_SECRET not configured - ' +
+          'skipping signature validation in development mode only. ' +
+          'This MUST be configured before production deployment!'
       )
       return true
     }
 
-    // HMAC-SHA256 validation
     const crypto = require('crypto')
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)
       .update(JSON.stringify(payload))
       .digest('hex')
 
-    return signature === expectedSignature
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    )
+
+    if (!isValid) {
+      console.error('IPN signature validation failed')
+    }
+
+    return isValid
   } catch (error) {
     console.error('Error validating IPN signature:', error)
+    if (error instanceof Error && error.message.includes('production')) {
+      throw error
+    }
     return false
   }
 }

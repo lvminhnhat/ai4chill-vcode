@@ -202,20 +202,20 @@ describe('SePay SDK Wrapper', () => {
       expect(isValid).toBe(false)
     })
 
-    it('should return true when no signature is provided (with warning)', () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
+    it('should return false when no signature is provided (with error)', () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
 
       const isValid = validateIpnSignature(payload)
 
-      expect(isValid).toBe(true)
+      expect(isValid).toBe(false)
       expect(consoleSpy).toHaveBeenCalledWith(
-        'No IPN signature provided - validation may be less secure'
+        'IPN signature is required but not provided'
       )
 
       consoleSpy.mockRestore()
     })
 
-    it('should return true when webhook secret is not configured (with warning)', () => {
+    it('should return true when webhook secret is not configured in development (with warning)', () => {
       delete process.env.SEPAY_WEBHOOK_SECRET
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
@@ -223,10 +223,56 @@ describe('SePay SDK Wrapper', () => {
 
       expect(isValid).toBe(true)
       expect(consoleSpy).toHaveBeenCalledWith(
-        'SEPAY_WEBHOOK_SECRET not configured - skipping signature validation'
+        expect.stringContaining('⚠️  SEPAY_WEBHOOK_SECRET not configured')
       )
 
       consoleSpy.mockRestore()
+    })
+
+    it('should throw error when webhook secret is not configured in production', () => {
+      delete process.env.SEPAY_WEBHOOK_SECRET
+
+      // Use Object.defineProperty to override NODE_ENV for testing
+      const originalNodeEnv = process.env.NODE_ENV
+      Object.defineProperty(process, 'env', {
+        value: { ...process.env, NODE_ENV: 'production' },
+        writable: true,
+        configurable: true,
+      })
+
+      expect(() => validateIpnSignature(payload, 'some-signature')).toThrow(
+        'SEPAY_WEBHOOK_SECRET must be configured in production'
+      )
+
+      // Reset NODE_ENV
+      Object.defineProperty(process, 'env', {
+        value: { ...process.env, NODE_ENV: originalNodeEnv },
+        writable: true,
+        configurable: true,
+      })
+    })
+
+    it('should use timing-safe comparison for signature validation', () => {
+      const crypto = require('crypto')
+      const signature = crypto
+        .createHmac('sha256', 'test_webhook_secret')
+        .update(JSON.stringify(payload))
+        .digest('hex')
+
+      // Mock timingSafeEqual to verify it's being called
+      const originalTimingSafeEqual = crypto.timingSafeEqual
+      const mockTimingSafeEqual = jest.fn().mockReturnValue(true)
+      crypto.timingSafeEqual = mockTimingSafeEqual
+
+      validateIpnSignature(payload, signature)
+
+      expect(mockTimingSafeEqual).toHaveBeenCalledWith(
+        Buffer.from(signature),
+        expect.any(Buffer)
+      )
+
+      // Restore original function
+      crypto.timingSafeEqual = originalTimingSafeEqual
     })
   })
 
