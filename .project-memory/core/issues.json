@@ -228,6 +228,49 @@
         "insertions": 2459,
         "deletions": 1
       }
+    },
+    {
+      "id": 30,
+      "key": "STORY-04-02",
+      "title": "Migrate Sepay Integration to Official SDK (sepay-pg-node)",
+      "status": "in_progress",
+      "resolution": null,
+      "branch": "feature/30-sepay-sdk-migration",
+      "pr": {
+        "number": 31,
+        "url": "https://github.com/lvminhnhat/ai4chill-vcode/pull/31",
+        "status": "open"
+      },
+      "commits": 9,
+      "filesChanged": "30+",
+      "details": [
+        "Installed sepay-pg-node SDK v1.0.0 and integrated into project",
+        "Added database fields: invoiceNumber, paymentMethod, sepayOrderId",
+        "Created SDK client wrapper with utilities for signing, request handling, and retries",
+        "Built checkout form component (SepayCheckoutForm) with user-friendly UX",
+        "Implemented IPN webhook handler with signature validation and security checks",
+        "Created callback pages for success, error, and cancel flows",
+        "Updated order creation flow to use SDK for creating orders and handling responses",
+        "Full test coverage: 22 unit tests covering SDK integration and helpers",
+        "Comprehensive documentation and migration guide included"
+      ],
+      "benefits": [
+        "Multiple payment methods supported (BANK_TRANSFER, CARD, NAPAS_QR)",
+        "Official SDK support reduces maintenance burden",
+        "Improved security with automatic signature validation",
+        "IPN (webhook) based notifications instead of polling",
+        "Professional checkout form improves conversion and UX"
+      ],
+      "testing": {
+        "unitTests": {
+          "count": 22,
+          "status": "passing"
+        },
+        "build": "successful",
+        "integrationGuide": "ready"
+      },
+      "acceptanceCriteriaMet": true,
+      "lastUpdated": "2025-11-23T13:05:00Z"
     }
   ]
 }

@@ -195,6 +195,39 @@
       ],
       "relatedCommits": ["3455c2e"],
       "status": "in_progress"
+    },
+    {
+      "id": "session-issue-30-2025-11-23",
+      "startedAt": "2025-11-23T12:50:00Z",
+      "endedAt": "2025-11-23T13:05:00Z",
+      "performedBy": "developer",
+      "issueReference": "STORY-04-02 (#30)",
+      "branch": "feature/30-sepay-sdk-migration",
+      "pr": {
+        "number": 31,
+        "url": "https://github.com/lvminhnhat/ai4chill-vcode/pull/31",
+        "status": "open"
+      },
+      "commits": 9,
+      "summary": "Migrate Sepay integration to official sepay-pg-node SDK, implemented SDK client wrapper, checkout form, IPN handler, DB changes and tests. PR opened (#31).",
+      "details": {
+        "workCompleted": [
+          "Installed sepay-pg-node SDK v1.0.0",
+          "Added invoiceNumber, paymentMethod, sepayOrderId fields to database",
+          "Created SDK client wrapper and utilities",
+          "Built SepayCheckoutForm component",
+          "Implemented IPN webhook handler with signature validation",
+          "Created callback pages (success, error, cancel)",
+          "Updated order creation flow to use SDK",
+          "Added 22 unit tests covering SDK integration",
+          "Wrote migration and documentation"
+        ],
+        "testResults": {
+          "unitTests": "22 passing",
+          "build": "successful"
+        }
+      },
+      "status": "completed"
     }
   ]
 }
