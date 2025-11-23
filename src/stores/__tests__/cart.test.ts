@@ -23,7 +23,7 @@ jest.mock('@/lib/utils', () => ({
 }))
 
 // Import after mocking
-import type { CartItem } from '@/types/product'
+import type { CartItem, Product } from '@/types/product'
 
 // Create a test version of the cart store
 const createTestCartStore = () => {
@@ -139,9 +139,10 @@ describe('Cart Store', () => {
     jest.clearAllMocks()
   })
 
-  const mockProduct = {
+  const mockProduct: Product = {
     id: '1',
     title: 'Test Product',
+    slug: 'test-product',
     price: 100,
     rating: 4.5,
     image: '/test.jpg',

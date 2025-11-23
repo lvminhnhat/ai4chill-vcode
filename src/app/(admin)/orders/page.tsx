@@ -239,9 +239,7 @@ export default async function AdminOrdersPage({
                             <div className="flex items-center">
                               <User className="mr-2 h-4 w-4 text-gray-400" />
                               <div>
-                                <p className="font-medium">
-                                  {order.customerName || 'Guest'}
-                                </p>
+                                <p className="font-medium">Guest</p>
                                 <p className="text-sm text-gray-500">
                                   {order.customerEmail}
                                 </p>
@@ -251,7 +249,9 @@ export default async function AdminOrdersPage({
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center">
                               <Package className="mr-2 h-4 w-4 text-gray-400" />
-                              {order.items.length}
+                              {Array.isArray(order.items)
+                                ? order.items.length
+                                : 0}
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-medium">
